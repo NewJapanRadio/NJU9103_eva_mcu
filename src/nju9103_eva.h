@@ -39,17 +39,7 @@ typedef uint16_t Command;
 
 static uint8_t calculateChkSum(uint8_t *data);
 static void isrRx();
-static void isrMainProc();
-static void isrSubProc();
-
-//static CommandStatus RegisterWriteByte(uint8_t address, uint8_t regData);
-//static CommandStatus RegisterReadByte(uint8_t address, uint8_t *regData);
-//static CommandStatus RegisterWriteShort(uint8_t address, uint16_t regData);
-//static CommandStatus RegisterReadShort(uint8_t address, uint16_t *regData);
-//static CommandStatus StartSingleConversion(uint8_t channel, uint16_t *adcData);
-//static CommandStatus StartContinuousConversion(uint8_t channel, uint16_t *buf, uint16_t length, uint16_t *resultLength);
-//static CommandStatus StartADCDataDump();
-//static CommandStatus StopContinuousConversion();
-//static CommandStatus StopADCDataDump();
+static void watchPacket();
+static void isrDispatch();
 
 #endif

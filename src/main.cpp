@@ -10,8 +10,7 @@ static ReceiveDataStatus receiveDataStatus;
 static Command command;
 
 static ::Serial *uart;
-static ::Timer *mainProc;
-static ::Timer *subProc;
+static ::Timer *dispatchTimer;
 static ::CommandDispatcher *dispatcher;
 
 void setup() {
@@ -19,18 +18,16 @@ void setup() {
     command = 0;
 
     uart = new ::Serial(UART_BAUDRATE, UART_BITS, UART_PARITY, UART_STOP);
-    mainProc = new ::Timer();
-    subProc = new ::Timer();
+    dispatchTimer = new ::Timer();
     dispatcher = new ::CommandDispatcher();
 
     // set Rx interrupt
     uart->attach(isrRx, ::Serial::RxIrq);
-    // set Timer interrupt
-    mainProc->attach(isrMainProc, 300);
-    subProc->attach(isrSubProc, 300);
+    dispatchTimer->attach(isrDispatch, 300);
 }
 
 void loop() {
+    watchPacket();
 }
 
 static uint8_t calculateChkSum(uint8_t *data) {
@@ -61,7 +58,7 @@ static void isrRx() {
     }
 }
 
-static void isrMainProc() {
+static void watchPacket() {
     if (receiveDataStatus & RX_STATUS_DATA_RECEIVED) {
         receiveDataStatus ^= RX_STATUS_DATA_RECEIVED;
         if ((receiveDataStatus & RX_STATUS_CHKSUM_ERROR) == 0) {
@@ -105,7 +102,7 @@ static void isrMainProc() {
     }
 }
 
-static void isrSubProc() {
+static void isrDispatch() {
     if (command != 0) {
         int isValidCommand = 0;
         if (command & CMD_WRITE_BYTE) {
@@ -177,12 +174,3 @@ static void isrSubProc() {
         }
     }
 }
-
-// CommandStatus RegisterWriteShort(uint8_t address, uint16_t regData);
-// CommandStatus RegisterReadShort(uint8_t address, uint16_t *regData);
-// CommandStatus StartSingleConversion(uint8_t channel, uint16_t *adcData);
-// CommandStatus StartContinuousConversion(uint8_t channel, uint16_t *buf, uint16_t length, uint16_t *resultLength);
-// CommandStatus StartADCDataDump();
-// CommandStatus StopContinuousConversion();
-// CommandStatus StopADCDataDump();
-

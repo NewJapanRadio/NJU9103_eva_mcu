@@ -4,14 +4,14 @@
 #include <mbed.h>
 
 class Rdyb {
+    protected:
+        int pinRdyb() { return PA_6; }
+
     public:
         Rdyb();
         ~Rdyb();
 
         int read();
-
-    protected:
-        int pinRdyb() { return PA_6; }
 };
 
 #endif
