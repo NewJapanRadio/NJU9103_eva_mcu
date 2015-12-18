@@ -1,5 +1,5 @@
-#ifndef TIMER_WRAPPER_H
-#define TIMER_WRAPPER_H
+#ifndef __TIMER_WRAPPER_H__
+#define __TIMER_WRAPPER_H__
 
 #include <mbed.h>
 
@@ -16,4 +16,3 @@ class Timer {
 };
 
 #endif
-

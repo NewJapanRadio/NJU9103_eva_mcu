@@ -2,7 +2,7 @@
 
 #include "nju9103_eva.h"
 #include "serial_wrapper.h"
-#include "spi_wrapper.h"
+#include "command_dispatcher.h"
 #include "timer_wrapper.h"
 
 static uint8_t rx_buffer[PACKET_SIZE];
@@ -10,20 +10,18 @@ static ReceiveDataStatus receiveDataStatus;
 static Command command;
 
 static ::Serial *uart;
-static ::SPI *spi;
 static ::Timer *mainProc;
 static ::Timer *subProc;
+static ::CommandDispatcher *dispatcher;
 
 void setup() {
     receiveDataStatus = 0;
     command = 0;
 
     uart = new ::Serial(UART_BAUDRATE, UART_BITS, UART_PARITY, UART_STOP);
-    spi = new ::SPI();
-    spi->mode(::SPI::Mode1);
-    spi->frequency(1E6);
     mainProc = new ::Timer();
     subProc = new ::Timer();
+    dispatcher = new ::CommandDispatcher();
 
     // set Rx interrupt
     uart->attach(isrRx, ::Serial::RxIrq);
@@ -113,14 +111,14 @@ static void isrSubProc() {
         if (command & CMD_WRITE_BYTE) {
             command ^= CMD_WRITE_BYTE;
             uart->println("RegisterWriteByte command");
-            RegisterWriteByte(rx_buffer[1], rx_buffer[2]);
+            dispatcher->RegisterWriteByte(rx_buffer[1], rx_buffer[2]);
             isValidCommand = 1;
         }
         else if (command & CMD_READ_BYTE) {
             command ^= CMD_READ_BYTE;
             uart->println("RegisterReadByte command");
             uint8_t rd = 0;
-            RegisterReadByte(rx_buffer[1], &rd);
+            dispatcher->RegisterReadByte(rx_buffer[1], &rd);
             char buf[16];
             sprintf(buf, "RD:0x%X", rd);
             uart->println(buf);
@@ -129,16 +127,28 @@ static void isrSubProc() {
         else if (command & CMD_WRITE_SHORT) {
             command ^= CMD_WRITE_SHORT;
             uart->println("RegisterWriteShort command");
+            uint16_t wd = (uint16_t)(rx_buffer[2] + (rx_buffer[3] << 8));
+            dispatcher->RegisterWriteShort(rx_buffer[1], wd);
             isValidCommand = 1;
         }
         else if (command & CMD_READ_SHORT) {
             command ^= CMD_READ_SHORT;
             uart->println("RegisterReadShort command");
+            uint16_t rd = 0;
+            dispatcher->RegisterReadShort(rx_buffer[1], &rd);
+            char buf[16];
+            sprintf(buf, "RD:0x%X", rd);
+            uart->println(buf);
             isValidCommand = 1;
         }
         else if (command & CMD_START_SINGLE) {
             command ^= CMD_START_SINGLE;
             uart->println("StartSingleConversion command");
+            uint16_t rd = 0;
+            dispatcher->StartSingleConversion(rx_buffer[1], &rd);
+            char buf[16];
+            sprintf(buf, "ADCDATA:0x%X", rd);
+            uart->println(buf);
             isValidCommand = 1;
         }
         else if (command & CMD_START_CONTINUOUS) {
@@ -166,26 +176,6 @@ static void isrSubProc() {
             uart->println("[ERROR] Invalid Command");
         }
     }
-}
-
-static CommandStatus RegisterWriteByte(uint8_t address, uint8_t regData) {
-    CommandStatus status = Error;
-    if ((address & 0xF0) == 0) {
-        spi->write((uint8_t)(address << 4));
-        spi->write(regData);
-        status = Success;
-    }
-    return status;
-}
-
-static CommandStatus RegisterReadByte(uint8_t address, uint8_t *regData) {
-    CommandStatus status = Error;
-    if ((address & 0xF0) == 0) {
-        spi->write((uint8_t)(address << 4) + 0x08);
-        *regData = spi->write(0xFF);
-        status = Success;
-    }
-    return status;
 }
 
 // CommandStatus RegisterWriteShort(uint8_t address, uint16_t regData);

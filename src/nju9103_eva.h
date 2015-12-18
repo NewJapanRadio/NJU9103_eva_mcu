@@ -42,15 +42,8 @@ static void isrRx();
 static void isrMainProc();
 static void isrSubProc();
 
-enum CommandStatus {
-    Error = -1,
-    Success = 0,
-    Abort = 1,
-    Fail = 2
-};
-
-static CommandStatus RegisterWriteByte(uint8_t address, uint8_t regData);
-static CommandStatus RegisterReadByte(uint8_t address, uint8_t *regData);
+//static CommandStatus RegisterWriteByte(uint8_t address, uint8_t regData);
+//static CommandStatus RegisterReadByte(uint8_t address, uint8_t *regData);
 //static CommandStatus RegisterWriteShort(uint8_t address, uint16_t regData);
 //static CommandStatus RegisterReadShort(uint8_t address, uint16_t *regData);
 //static CommandStatus StartSingleConversion(uint8_t channel, uint16_t *adcData);

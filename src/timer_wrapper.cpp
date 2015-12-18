@@ -5,6 +5,7 @@
 }
 
 ::Timer::~Timer() {
+    detach();
     delete timer;
 }
 
