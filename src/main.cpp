@@ -10,7 +10,7 @@ static ReceiveDataStatus receiveDataStatus;
 static Command command;
 
 static ::Serial *uart;
-static ::Timer *dispatchTimer;
+static ::Timer *packetWatchTimer;
 static ::CommandDispatcher *dispatcher;
 
 void setup() {
@@ -18,16 +18,16 @@ void setup() {
     command = 0;
 
     uart = new ::Serial(UART_BAUDRATE, UART_BITS, UART_PARITY, UART_STOP);
-    dispatchTimer = new ::Timer();
+    packetWatchTimer = new ::Timer();
     dispatcher = new ::CommandDispatcher();
 
     // set Rx interrupt
     uart->attach(isrRx, ::Serial::RxIrq);
-    dispatchTimer->attach(isrDispatch, 300);
+    packetWatchTimer->attach(isrPacketWatch, 300);
 }
 
 void loop() {
-    watchPacket();
+    dispatchPacket();
 }
 
 static uint8_t calculateChkSum(uint8_t *data) {
@@ -58,7 +58,7 @@ static void isrRx() {
     }
 }
 
-static void watchPacket() {
+static void isrPacketWatch() {
     if (receiveDataStatus & RX_STATUS_DATA_RECEIVED) {
         receiveDataStatus ^= RX_STATUS_DATA_RECEIVED;
         if ((receiveDataStatus & RX_STATUS_CHKSUM_ERROR) == 0) {
@@ -85,6 +85,10 @@ static void watchPacket() {
                 case OP_START_ADC_DATA_DUMP :
                     command |= CMD_START_DUMP;
                     break;
+                case OP_STOP_SINGLE_CONVERSION :
+                    dispatcher->setAbortRequest();
+                    command |= CMD_STOP_SINGLE;
+                    break;
                 case OP_STOP_CONTINUOUS_CONVERSION :
                     command |= CMD_STOP_CONTINUOUS;
                     break;
@@ -92,6 +96,7 @@ static void watchPacket() {
                     command |= CMD_STOP_DUMP;
                     break;
                 default :
+                    command |= CMD_UNKNOWN;
                     break;
             }
         }
@@ -102,14 +107,12 @@ static void watchPacket() {
     }
 }
 
-static void isrDispatch() {
+static void dispatchPacket() {
     if (command != 0) {
-        int isValidCommand = 0;
         if (command & CMD_WRITE_BYTE) {
             command ^= CMD_WRITE_BYTE;
             uart->println("RegisterWriteByte command");
             dispatcher->RegisterWriteByte(rx_buffer[1], rx_buffer[2]);
-            isValidCommand = 1;
         }
         else if (command & CMD_READ_BYTE) {
             command ^= CMD_READ_BYTE;
@@ -119,14 +122,12 @@ static void isrDispatch() {
             char buf[16];
             sprintf(buf, "RD:0x%X", rd);
             uart->println(buf);
-            isValidCommand = 1;
         }
         else if (command & CMD_WRITE_SHORT) {
             command ^= CMD_WRITE_SHORT;
             uart->println("RegisterWriteShort command");
             uint16_t wd = (uint16_t)(rx_buffer[2] + (rx_buffer[3] << 8));
             dispatcher->RegisterWriteShort(rx_buffer[1], wd);
-            isValidCommand = 1;
         }
         else if (command & CMD_READ_SHORT) {
             command ^= CMD_READ_SHORT;
@@ -136,7 +137,6 @@ static void isrDispatch() {
             char buf[16];
             sprintf(buf, "RD:0x%X", rd);
             uart->println(buf);
-            isValidCommand = 1;
         }
         else if (command & CMD_START_SINGLE) {
             command ^= CMD_START_SINGLE;
@@ -146,30 +146,29 @@ static void isrDispatch() {
             char buf[16];
             sprintf(buf, "ADCDATA:0x%X", rd);
             uart->println(buf);
-            isValidCommand = 1;
         }
         else if (command & CMD_START_CONTINUOUS) {
             command ^= CMD_START_CONTINUOUS;
             uart->println("StartContinuousConversion command");
-            isValidCommand = 1;
         }
         else if (command & CMD_START_DUMP) {
             command ^= CMD_START_DUMP;
             uart->println("StartADCDataDump command");
-            isValidCommand = 1;
+        }
+        else if (command & CMD_STOP_SINGLE) {
+            command ^= CMD_STOP_SINGLE;
+            uart->println("StopSingleConversion command");
         }
         else if (command & CMD_STOP_CONTINUOUS) {
             command ^= CMD_STOP_CONTINUOUS;
             uart->println("StopContinuousConversion command");
-            isValidCommand = 1;
         }
         else if (command & CMD_STOP_DUMP) {
             command ^= CMD_STOP_DUMP;
             uart->println("StopADCDataDump command");
-            isValidCommand = 1;
         }
-
-        if ((isValidCommand == 0) || (command != 0)) {
+        else if (command & CMD_UNKNOWN) {
+            command ^= CMD_UNKNOWN;
             uart->println("[ERROR] Invalid Command");
         }
     }

@@ -41,9 +41,13 @@ class CommandDispatcher {
         //Status StopContinuousConversion();
         //Status StopADCDataDump();
 
+        void setAbortRequest();
+
     private:
         ::SPI *spi;
         ::Rdyb *rdyb;
+
+        bool abortRequest;
 };
 
 #endif

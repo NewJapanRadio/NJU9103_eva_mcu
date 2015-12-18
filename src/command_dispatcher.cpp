@@ -7,6 +7,8 @@
     spi = new ::SPI();
     spi->mode(::SPI::Mode1);
     spi->frequency(1E6);
+
+    abortRequest = false;
 }
 
 ::CommandDispatcher::~CommandDispatcher() {
@@ -76,6 +78,15 @@
 
 ::CommandDispatcher::Status ::CommandDispatcher::StartSingleConversion(uint8_t control, uint16_t *regData) {
     RegisterWriteByte(ADDR_CTRL, control);
-    while (rdyb->read() == 1) { }
+    while (rdyb->read() == 1) {
+        if (abortRequest) {
+            abortRequest = false;
+            return Abort;
+        }
+    }
     return RegisterReadShort((uint8_t)0x0A, regData);
+}
+
+void ::CommandDispatcher::setAbortRequest() {
+    abortRequest = true;
 }
