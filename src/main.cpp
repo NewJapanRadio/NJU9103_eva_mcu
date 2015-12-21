@@ -2,7 +2,7 @@
 
 #include "nju9103_eva.h"
 #include "serial_wrapper.h"
-#include "command_dispatcher.h"
+#include "spi_command.h"
 #include "timer_wrapper.h"
 #include "adc_data_buffer.h"
 
@@ -19,7 +19,7 @@ static Command command;
 
 static ::Serial *uart;
 static ::Timer *packetWatchTimer;
-static ::CommandDispatcher *dispatcher;
+static ::SPICommand *dispatcher;
 static ::ADCDataBuffer *adcDataBuffer;
 
 void setup() {
@@ -28,7 +28,7 @@ void setup() {
 
     uart = new ::Serial(UART_BAUDRATE, UART_BITS, UART_PARITY, UART_STOP);
     packetWatchTimer = new ::Timer();
-    dispatcher = new ::CommandDispatcher();
+    dispatcher = new ::SPICommand();
     adcDataBuffer = new ::ADCDataBuffer;
 
     // set Rx interrupt
@@ -151,12 +151,12 @@ static void dispatchCommand() {
     packet.Param = 0x00;
     packet.Data0 = 0x00;
     packet.Data1 = 0x00;
-    ::CommandDispatcher::Status status;
+    ::SPICommand::Status status;
     if (command != 0) {
         if (command & CMD_RESET) {
             command ^= CMD_RESET;
             status = dispatcher->SPIReset();
-            if (status == ::CommandDispatcher::Success) {
+            if (status == ::SPICommand::Success) {
                 packet.Type = OP_SPI_RESET;
                 packet.Param = 0x00;
                 packet.Data0 = 0x00;
@@ -167,7 +167,7 @@ static void dispatchCommand() {
             command ^= CMD_WRITE_8BIT;
             if (checkAddressRange(rx_buffer[1])) {
                 status = dispatcher->RegisterWrite8Bit(rx_buffer[1], rx_buffer[2]);
-                if (status == ::CommandDispatcher::Success) {
+                if (status == ::SPICommand::Success) {
                     packet.Type = OP_REGISTER_WRITE_8BIT;
                     packet.Param = rx_buffer[1];
                     packet.Data0 = rx_buffer[2];
@@ -186,7 +186,7 @@ static void dispatchCommand() {
             if (checkAddressRange(rx_buffer[1])) {
                 uint8_t rd = 0;
                 status = dispatcher->RegisterRead8Bit(rx_buffer[1], &rd);
-                if (status == ::CommandDispatcher::Success) {
+                if (status == ::SPICommand::Success) {
                     packet.Type = OP_REGISTER_READ_8BIT;
                     packet.Param = rx_buffer[1];
                     packet.Data0 = rd;
@@ -204,7 +204,7 @@ static void dispatchCommand() {
             command ^= CMD_WRITE_16BIT;
             if (checkAddressRange(rx_buffer[1])) {
                 status = dispatcher->RegisterWrite16Bit(rx_buffer[1], rx_buffer[2], rx_buffer[3]);
-                if (status == ::CommandDispatcher::Success) {
+                if (status == ::SPICommand::Success) {
                     packet.Type = OP_REGISTER_WRITE_16BIT;
                     packet.Param = rx_buffer[1];
                     packet.Data0 = rx_buffer[2];
@@ -224,7 +224,7 @@ static void dispatchCommand() {
                 uint8_t rd0 = 0;
                 uint8_t rd1 = 0;
                 status = dispatcher->RegisterRead16Bit(rx_buffer[1], &rd0, &rd1);
-                if (status == ::CommandDispatcher::Success) {
+                if (status == ::SPICommand::Success) {
                     packet.Type = OP_REGISTER_READ_16BIT;
                     packet.Param = rx_buffer[1];
                     packet.Data0 = rd0;
@@ -243,12 +243,12 @@ static void dispatchCommand() {
             if (validateCtrl(rx_buffer[1])) {
                 uint16_t rd = 0;
                 status = dispatcher->StartSingleConversion(rx_buffer[1], &rd);
-                if (status == ::CommandDispatcher::Success) {
+                if (status == ::SPICommand::Success) {
                     packet.Type = OP_REGISTER_READ_16BIT;
                     packet.Param = rx_buffer[1];
                     packet.Data = rd;
                 }
-                else if (status == ::CommandDispatcher::Abort) {
+                else if (status == ::SPICommand::Abort) {
                     return;
                 }
             }
@@ -272,13 +272,13 @@ static void dispatchCommand() {
                 if (adcDataBuffer->Alloc(alignedLength)) {
                     uint16_t resultLength = 0;
                     status = dispatcher->StartContinuousConversion(rx_buffer[1], adcDataBuffer->GetBuffer(), length, &resultLength);
-                    if (status == ::CommandDispatcher::Success) {
+                    if (status == ::SPICommand::Success) {
                         packet.Type = OP_START_CONTINUOUS_CONVERSION;
                         packet.Param = rx_buffer[1];
                         packet.Data0 = (uint8_t)(length >> 8);
                         packet.Data1 = (uint8_t)(length & 0x00FF);
                     }
-                    else if (status == ::CommandDispatcher::Abort) {
+                    else if (status == ::SPICommand::Abort) {
                         return;
                     }
                 }

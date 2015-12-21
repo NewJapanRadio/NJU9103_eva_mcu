@@ -19,7 +19,7 @@
 #define ADDR_OFFSET1   0xC
 #define ADDR_OFFSET2   0xD
 
-class CommandDispatcher {
+class SPICommand {
     public:
         enum Status {
             Error = -1,
@@ -28,8 +28,8 @@ class CommandDispatcher {
             Fail = 2
         };
 
-        CommandDispatcher();
-        ~CommandDispatcher();
+        SPICommand();
+        ~SPICommand();
 
         Status SPIReset();
         Status RegisterWrite8Bit(uint8_t address, uint8_t data);

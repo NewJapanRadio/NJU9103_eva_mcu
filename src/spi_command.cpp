@@ -1,7 +1,7 @@
-#include "command_dispatcher.h"
+#include "spi_command.h"
 #include "rdyb_wrapper.h"
 
-::CommandDispatcher::CommandDispatcher() {
+::SPICommand::SPICommand() {
     rdyb = new ::Rdyb();
 
     spi = new ::SPI();
@@ -11,11 +11,11 @@
     abortRequest = false;
 }
 
-::CommandDispatcher::~CommandDispatcher() {
+::SPICommand::~SPICommand() {
     delete spi;
 }
 
-::CommandDispatcher::Status ::CommandDispatcher::SPIReset() {
+::SPICommand::Status ::SPICommand::SPIReset() {
     Status status = Error;
     spi->write(0x7F);
     spi->write(0xFF);
@@ -24,7 +24,7 @@
     return status;
 }
 
-::CommandDispatcher::Status ::CommandDispatcher::RegisterWrite8Bit(uint8_t address, uint8_t data) {
+::SPICommand::Status ::SPICommand::RegisterWrite8Bit(uint8_t address, uint8_t data) {
     Status status = Error;
     if ((address & 0xF0) == 0) {
         uint8_t rw = 0;
@@ -38,7 +38,7 @@
     return status;
 }
 
-::CommandDispatcher::Status ::CommandDispatcher::RegisterRead8Bit(uint8_t address, uint8_t *data) {
+::SPICommand::Status ::SPICommand::RegisterRead8Bit(uint8_t address, uint8_t *data) {
     Status status = Error;
     if ((address & 0xF0) == 0) {
         uint8_t rw = 1;
@@ -52,7 +52,7 @@
     return status;
 }
 
-::CommandDispatcher::Status ::CommandDispatcher::RegisterWrite16Bit(uint8_t address, uint8_t data0, uint8_t data1) {
+::SPICommand::Status ::SPICommand::RegisterWrite16Bit(uint8_t address, uint8_t data0, uint8_t data1) {
     Status status = Error;
     if ((address & 0xF0) == 0) {
         uint8_t rw = 0;
@@ -67,7 +67,7 @@
     return status;
 }
 
-::CommandDispatcher::Status ::CommandDispatcher::RegisterRead16Bit(uint8_t address, uint8_t *data0, uint8_t *data1) {
+::SPICommand::Status ::SPICommand::RegisterRead16Bit(uint8_t address, uint8_t *data0, uint8_t *data1) {
     Status status = Error;
     if ((address & 0xF0) == 0) {
         uint8_t rw = 1;
@@ -82,14 +82,14 @@
     return status;
 }
 
-static ::CommandDispatcher::Status ReadADCData(::CommandDispatcher *dispatcher, uint16_t *data) {
+static ::SPICommand::Status ReadADCData(::SPICommand *dispatcher, uint16_t *data) {
     uint8_t high, low;
-    ::CommandDispatcher::Status status = dispatcher->RegisterRead16Bit(ADDR_ADCDATA0, &high, &low);
+    ::SPICommand::Status status = dispatcher->RegisterRead16Bit(ADDR_ADCDATA0, &high, &low);
     *data = (uint16_t)((high << 8) + low);
     return status;
 }
 
-::CommandDispatcher::Status ::CommandDispatcher::StartSingleConversion(uint8_t control, uint16_t *data) {
+::SPICommand::Status ::SPICommand::StartSingleConversion(uint8_t control, uint16_t *data) {
     RegisterWrite8Bit(ADDR_CTRL, control);
     while (rdyb->read() == 1) {
         if (abortRequest) {
@@ -100,7 +100,7 @@ static ::CommandDispatcher::Status ReadADCData(::CommandDispatcher *dispatcher, 
     return ReadADCData(this, data);
 }
 
-::CommandDispatcher::Status ::CommandDispatcher::StartContinuousConversion(uint8_t control, uint16_t buf[], uint16_t length, uint16_t *resultLength) {
+::SPICommand::Status ::SPICommand::StartContinuousConversion(uint8_t control, uint16_t buf[], uint16_t length, uint16_t *resultLength) {
     RegisterWrite8Bit(ADDR_CTRL, control);
     for (int i = 0; i <= length; i++) {
         while (rdyb->read() == 1) {
@@ -118,6 +118,6 @@ static ::CommandDispatcher::Status ReadADCData(::CommandDispatcher *dispatcher, 
     return Success;
 }
 
-void ::CommandDispatcher::SetAbortRequest() {
+void ::SPICommand::SetAbortRequest() {
     abortRequest = true;
 }
