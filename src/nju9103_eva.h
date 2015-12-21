@@ -3,7 +3,27 @@
 
 #include "serial_wrapper.h"
 
+#define MAX_BUFFER_SIZE 0x4000
+
 #define PACKET_SIZE 4
+
+typedef struct {
+    union {
+        uint16_t ADCData0;
+        struct {
+            uint8_t Type;
+            uint8_t Param;
+        };
+    };
+    union {
+        uint16_t ADCData1;
+        uint16_t Data;
+        struct {
+            uint8_t Data0;
+            uint8_t Data1;
+        };
+    };
+} Packet;
 
 #define UART_BAUDRATE 115200
 #define UART_BITS 8
@@ -11,10 +31,11 @@
 #define UART_STOP 1
 
 /* Operation Code */
-#define OP_REGISTER_WRITE_BYTE         0x10
-#define OP_REGISTER_READ_BYTE          0x20
-#define OP_REGISTER_WRITE_SHORT        0x30
-#define OP_REGISTER_READ_SHORT         0x40
+#define OP_SPI_RESET                   0x00
+#define OP_REGISTER_WRITE_8BIT         0x10
+#define OP_REGISTER_READ_8BIT          0x20
+#define OP_REGISTER_WRITE_16BIT        0x30
+#define OP_REGISTER_READ_16BIT         0x40
 #define OP_START_SINGLE_CONVERSION     0x50
 #define OP_START_CONTINUOUS_CONVERSION 0x60
 #define OP_START_ADC_DATA_DUMP         0x70
@@ -22,16 +43,22 @@
 #define OP_STOP_CONTINUOUS_CONVERSION  0x61
 #define OP_STOP_ADC_DATA_DUMP          0x71
 
+#define OP_CHKSUM_ERROR                0xFF
+#define OP_PARAMETER_ERROR             0xFE
+#define OP_BUFFER_SIZE_ERROR           0xFD
+#define OP_UNKNOWN_ERROR               0xFC
+
 typedef uint8_t ReceiveDataStatus;
 /* Receive Data Status Flag */
 #define RX_STATUS_CHKSUM_ERROR  0x01
 #define RX_STATUS_DATA_RECEIVED 0x02
 
 typedef uint16_t Command;
-#define CMD_WRITE_BYTE       0x0001
-#define CMD_READ_BYTE        0x0002
-#define CMD_WRITE_SHORT      0x0004
-#define CMD_READ_SHORT       0x0008
+#define CMD_RESET            0x1000
+#define CMD_WRITE_8BIT       0x0001
+#define CMD_READ_8BIT        0x0002
+#define CMD_WRITE_16BIT      0x0004
+#define CMD_READ_16BIT       0x0008
 #define CMD_START_SINGLE     0x0010
 #define CMD_START_CONTINUOUS 0x0020
 #define CMD_START_DUMP       0x0040
@@ -39,10 +66,5 @@ typedef uint16_t Command;
 #define CMD_STOP_CONTINUOUS  0x0100
 #define CMD_STOP_DUMP        0x0200
 #define CMD_UNKNOWN          0x8000
-
-static uint8_t calculateChkSum(uint8_t *data);
-static void isrRx();
-static void isrPacketWatch();
-static void dispatchPacket();
 
 #endif

@@ -44,6 +44,10 @@ int8_t ::Serial::writeable() {
     return serial->writeable();
 }
 
+void ::Serial::write(const uint8_t data) {
+    serial->putc(data);
+}
+
 void ::Serial::print(const char* str) {
     serial->printf(str);
 }

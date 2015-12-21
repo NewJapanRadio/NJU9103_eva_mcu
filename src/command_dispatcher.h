@@ -31,17 +31,15 @@ class CommandDispatcher {
         CommandDispatcher();
         ~CommandDispatcher();
 
-        Status RegisterWriteByte(uint8_t address, uint8_t regData);
-        Status RegisterReadByte(uint8_t address, uint8_t *regData);
-        Status RegisterWriteShort(uint8_t address, uint16_t regData);
-        Status RegisterReadShort(uint8_t address, uint16_t *regData);
+        Status SPIReset();
+        Status RegisterWrite8Bit(uint8_t address, uint8_t data);
+        Status RegisterRead8Bit(uint8_t address, uint8_t *data);
+        Status RegisterWrite16Bit(uint8_t address, uint8_t data0, uint8_t data1);
+        Status RegisterRead16Bit(uint8_t address, uint8_t *data0, uint8_t *data1);
         Status StartSingleConversion(uint8_t control, uint16_t *adcData);
-        //Status StartContinuousConversion(uint8_t control, uint16_t *buf, uint16_t length, uint16_t *resultLength);
-        //// Status StartADCDataDump();
-        //Status StopContinuousConversion();
-        //Status StopADCDataDump();
+        Status StartContinuousConversion(uint8_t control, uint16_t buf[], uint16_t length, uint16_t *resultLength);
 
-        void setAbortRequest();
+        void SetAbortRequest();
 
     private:
         ::SPI *spi;
