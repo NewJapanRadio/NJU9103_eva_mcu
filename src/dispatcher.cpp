@@ -4,40 +4,41 @@
 static bool checkAddressRange(uint8_t address);
 static bool validateCtrl(uint8_t ctrl);
 
-Dispatcher::Dispatcher() {
+::Dispatcher::Dispatcher() {
     spiCommand = new ::SPICommand();
 }
 
-Dispatcher::~Dispatcher() {
+::Dispatcher::~Dispatcher() {
     delete spiCommand;
 }
 
-void Dispatcher::Dispatch(Command *command, uint8_t *rx_buffer, Packet *packet, ::ADCDataBuffer *adcDataBuffer) {
+::Dispatcher::Status ::Dispatcher::Dispatch(Command *command, uint8_t *rx_buffer, Packet *packet, ::ADCDataBuffer *adcDataBuffer) {
     packet->Type = OP_UNKNOWN_ERROR;
     packet->Param = 0x00;
     packet->Data0 = 0x00;
     packet->Data1 = 0x00;
-    ::SPICommand::Status status;
+    Status status = Error;
+    ::SPICommand::Status spiStatus;
     if (*command != 0) {
         if (*command & CMD_RESET) {
-            *command ^= CMD_RESET;
-            status = spiCommand->SPIReset();
-            if (status == ::SPICommand::Success) {
+            spiStatus = spiCommand->SPIReset();
+            if (spiStatus == ::SPICommand::Success) {
                 packet->Type = OP_SPI_RESET;
                 packet->Param = 0x00;
                 packet->Data0 = 0x00;
                 packet->Data1 = 0x00;
             }
+            *command ^= CMD_RESET;
         }
         else if (*command & CMD_WRITE_8BIT) {
-            *command ^= CMD_WRITE_8BIT;
             if (checkAddressRange(rx_buffer[1])) {
-                status = spiCommand->RegisterWrite8Bit(rx_buffer[1], rx_buffer[2]);
-                if (status == ::SPICommand::Success) {
+                spiStatus = spiCommand->RegisterWrite8Bit(rx_buffer[1], rx_buffer[2]);
+                if (spiStatus == ::SPICommand::Success) {
                     packet->Type = OP_REGISTER_WRITE_8BIT;
                     packet->Param = rx_buffer[1];
                     packet->Data0 = rx_buffer[2];
                     packet->Data1 = 0x00;
+                    status = Success;
                 }
             }
             else {
@@ -46,13 +47,13 @@ void Dispatcher::Dispatch(Command *command, uint8_t *rx_buffer, Packet *packet, 
                 packet->Data0 = rx_buffer[2];
                 packet->Data1 = 0x00;
             }
+            *command ^= CMD_WRITE_8BIT;
         }
         else if (*command & CMD_READ_8BIT) {
-            *command ^= CMD_READ_8BIT;
             if (checkAddressRange(rx_buffer[1])) {
                 uint8_t rd = 0;
-                status = spiCommand->RegisterRead8Bit(rx_buffer[1], &rd);
-                if (status == ::SPICommand::Success) {
+                spiStatus = spiCommand->RegisterRead8Bit(rx_buffer[1], &rd);
+                if (spiStatus == ::SPICommand::Success) {
                     packet->Type = OP_REGISTER_READ_8BIT;
                     packet->Param = rx_buffer[1];
                     packet->Data0 = rd;
@@ -65,12 +66,12 @@ void Dispatcher::Dispatch(Command *command, uint8_t *rx_buffer, Packet *packet, 
                 packet->Data0 = rx_buffer[2];
                 packet->Data1 = 0x00;
             }
+            *command ^= CMD_READ_8BIT;
         }
         else if (*command & CMD_WRITE_16BIT) {
-            *command ^= CMD_WRITE_16BIT;
             if (checkAddressRange(rx_buffer[1])) {
-                status = spiCommand->RegisterWrite16Bit(rx_buffer[1], rx_buffer[2], rx_buffer[3]);
-                if (status == ::SPICommand::Success) {
+                spiStatus = spiCommand->RegisterWrite16Bit(rx_buffer[1], rx_buffer[2], rx_buffer[3]);
+                if (spiStatus == ::SPICommand::Success) {
                     packet->Type = OP_REGISTER_WRITE_16BIT;
                     packet->Param = rx_buffer[1];
                     packet->Data0 = rx_buffer[2];
@@ -83,14 +84,14 @@ void Dispatcher::Dispatch(Command *command, uint8_t *rx_buffer, Packet *packet, 
                 packet->Data0 = rx_buffer[2];
                 packet->Data1 = 0x00;
             }
+            *command ^= CMD_WRITE_16BIT;
         }
         else if (*command & CMD_READ_16BIT) {
-            *command ^= CMD_READ_16BIT;
             if (checkAddressRange(rx_buffer[1])) {
                 uint8_t rd0 = 0;
                 uint8_t rd1 = 0;
-                status = spiCommand->RegisterRead16Bit(rx_buffer[1], &rd0, &rd1);
-                if (status == ::SPICommand::Success) {
+                spiStatus = spiCommand->RegisterRead16Bit(rx_buffer[1], &rd0, &rd1);
+                if (spiStatus == ::SPICommand::Success) {
                     packet->Type = OP_REGISTER_READ_16BIT;
                     packet->Param = rx_buffer[1];
                     packet->Data0 = rd0;
@@ -103,19 +104,19 @@ void Dispatcher::Dispatch(Command *command, uint8_t *rx_buffer, Packet *packet, 
                 packet->Data0 = rx_buffer[2];
                 packet->Data1 = 0x00;
             }
+            *command ^= CMD_READ_16BIT;
         }
         else if (*command & CMD_START_SINGLE) {
-            *command ^= CMD_START_SINGLE;
             if (validateCtrl(rx_buffer[1])) {
                 uint16_t rd = 0;
-                status = spiCommand->StartSingleConversion(rx_buffer[1], &rd);
-                if (status == ::SPICommand::Success) {
+                spiStatus = spiCommand->StartSingleConversion(rx_buffer[1], &rd);
+                if (spiStatus == ::SPICommand::Success) {
                     packet->Type = OP_REGISTER_READ_16BIT;
                     packet->Param = rx_buffer[1];
                     packet->Data = rd;
                 }
-                else if (status == ::SPICommand::Abort) {
-                    return;
+                else if (spiStatus == ::SPICommand::Abort) {
+                    status = Abort;
                 }
             }
             else {
@@ -124,9 +125,9 @@ void Dispatcher::Dispatch(Command *command, uint8_t *rx_buffer, Packet *packet, 
                 packet->Data0 = rx_buffer[2];
                 packet->Data1 = 0x00;
             }
+            *command ^= CMD_START_SINGLE;
         }
         else if (*command & CMD_START_CONTINUOUS) {
-            *command ^= CMD_START_CONTINUOUS;
             if (validateCtrl(rx_buffer[1])) {
                 uint32_t length = (uint16_t)((rx_buffer[2] << 8) + rx_buffer[3]);
 
@@ -137,15 +138,15 @@ void Dispatcher::Dispatch(Command *command, uint8_t *rx_buffer, Packet *packet, 
                 }
                 if (adcDataBuffer->Alloc(alignedLength)) {
                     uint16_t resultLength = 0;
-                    status = spiCommand->StartContinuousConversion(rx_buffer[1], adcDataBuffer->GetBuffer(), length, &resultLength);
-                    if (status == ::SPICommand::Success) {
+                    spiStatus = spiCommand->StartContinuousConversion(rx_buffer[1], adcDataBuffer->GetBuffer(), length, &resultLength);
+                    if (spiStatus == ::SPICommand::Success) {
                         packet->Type = OP_START_CONTINUOUS_CONVERSION;
                         packet->Param = rx_buffer[1];
                         packet->Data0 = (uint8_t)(length >> 8);
                         packet->Data1 = (uint8_t)(length & 0x00FF);
                     }
-                    else if (status == ::SPICommand::Abort) {
-                        return;
+                    else if (spiStatus == ::SPICommand::Abort) {
+                        status = Abort;
                     }
                 }
                 else {
@@ -161,42 +162,44 @@ void Dispatcher::Dispatch(Command *command, uint8_t *rx_buffer, Packet *packet, 
                 packet->Data0 = rx_buffer[2];
                 packet->Data1 = 0x00;
             }
+            *command ^= CMD_START_CONTINUOUS;
         }
         else if (*command & CMD_START_DUMP) {
-            *command ^= CMD_START_DUMP;
             packet->Type = OP_START_ADC_DATA_DUMP;
             packet->Param = 0x00;
             packet->Data0 = 0x00;
             packet->Data1 = 0x00;
+            *command ^= CMD_START_DUMP;
         }
         else if (*command & CMD_STOP_SINGLE) {
-            *command ^= CMD_STOP_SINGLE;
             packet->Type = OP_STOP_SINGLE_CONVERSION;
             packet->Param = 0x00;
             packet->Data0 = 0x00;
             packet->Data1 = 0x00;
+            *command ^= CMD_STOP_SINGLE;
         }
         else if (*command & CMD_STOP_CONTINUOUS) {
-            *command ^= CMD_STOP_CONTINUOUS;
             packet->Type = OP_STOP_CONTINUOUS_CONVERSION;
             packet->Param = 0x00;
             packet->Data0 = 0x00;
             packet->Data1 = 0x00;
+            *command ^= CMD_STOP_CONTINUOUS;
         }
         else if (*command & CMD_STOP_DUMP) {
-            *command ^= CMD_STOP_DUMP;
             packet->Type = OP_STOP_ADC_DATA_DUMP;
             packet->Param = 0x00;
             packet->Data0 = 0x00;
             packet->Data1 = 0x00;
+            *command ^= CMD_STOP_DUMP;
         }
         else if (*command & CMD_UNKNOWN) {
             *command ^= CMD_UNKNOWN;
         }
     }
+    return status;
 }
 
-void Dispatcher::SetAbortRequest() {
+void ::Dispatcher::SetAbortRequest() {
     spiCommand->SetAbortRequest();
 }
 

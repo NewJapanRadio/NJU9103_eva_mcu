@@ -5,10 +5,17 @@
 
 class Dispatcher {
     public:
+        enum Status {
+            Error = -1,
+            Success = 0,
+            Abort = 1,
+            Fail = 2
+        };
+
         Dispatcher();
         ~Dispatcher();
 
-        void Dispatch(Command *command, uint8_t *rx_buffer, Packet *packet, ::ADCDataBuffer *adcDataBuffer);
+        Status Dispatch(Command *command, uint8_t *rx_buffer, Packet *packet, ::ADCDataBuffer *adcDataBuffer);
         void SetAbortRequest();
 
     private:

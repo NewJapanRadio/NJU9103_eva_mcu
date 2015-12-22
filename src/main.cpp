@@ -12,6 +12,7 @@ static void isrPacketWatch();
 static uint8_t calculateChkSum(Packet *packet);
 static uint8_t calculateChkSum(uint8_t *data);
 static void returnResponse(Packet *packet);
+static void decodeCommand(uint8_t cmdraw, Command *cmd);
 
 static uint8_t rx_buffer[PACKET_SIZE];
 static ReceiveDataStatus receiveDataStatus;
@@ -40,11 +41,14 @@ void loop() {
     Packet packet;
 
     if (command != 0) {
-        dispatcher->Dispatch(&command, rx_buffer, &packet, adcDataBuffer);
+        ::Dispatcher::Status status;
+        status = dispatcher->Dispatch(&command, rx_buffer, &packet, adcDataBuffer);
 
-        returnResponse(&packet);
-        if (packet.Type == OP_START_ADC_DATA_DUMP) {
-            adcDataBuffer->Dump(returnResponse);
+        if (status != ::Dispatcher::Abort) {
+            returnResponse(&packet);
+            if (packet.Type == OP_START_ADC_DATA_DUMP) {
+                adcDataBuffer->Dump(returnResponse);
+            }
         }
     }
 }
@@ -73,46 +77,21 @@ static void isrPacketWatch() {
     if (receiveDataStatus & RX_STATUS_DATA_RECEIVED) {
         receiveDataStatus ^= RX_STATUS_DATA_RECEIVED;
         if ((receiveDataStatus & RX_STATUS_CHKSUM_ERROR) == 0) {
-            switch (rx_buffer[0]) {
-                case OP_SPI_RESET :
-                    command |= CMD_RESET;
-                    break;
-                case OP_REGISTER_WRITE_8BIT :
-                    command |= CMD_WRITE_8BIT;
-                    break;
-                case OP_REGISTER_READ_8BIT :
-                    command |= CMD_READ_8BIT;
-                    break;
-                case OP_REGISTER_WRITE_16BIT :
-                    command |= CMD_WRITE_16BIT;
-                    break;
-                case OP_REGISTER_READ_16BIT :
-                    command |= CMD_READ_16BIT;
-                    break;
-                case OP_START_SINGLE_CONVERSION :
-                    command |= CMD_START_SINGLE;
-                    break;
-                case OP_START_CONTINUOUS_CONVERSION :
-                    command |= CMD_START_CONTINUOUS;
-                    break;
-                case OP_START_ADC_DATA_DUMP :
-                    command |= CMD_START_DUMP;
-                    break;
-                case OP_STOP_SINGLE_CONVERSION :
+            decodeCommand(rx_buffer[0], &command);
+            if ((command & CMD_STOP_SINGLE) != 0) {
+                if ((command & CMD_START_SINGLE) != 0) {
                     dispatcher->SetAbortRequest();
-                    command |= CMD_STOP_SINGLE;
-                    break;
-                case OP_STOP_CONTINUOUS_CONVERSION :
+                }
+            }
+            else if ((command & CMD_STOP_CONTINUOUS) != 0) {
+                if ((command & CMD_START_CONTINUOUS) != 0) {
                     dispatcher->SetAbortRequest();
-                    command |= CMD_STOP_CONTINUOUS;
-                    break;
-                case OP_STOP_ADC_DATA_DUMP :
+                }
+            }
+            else if ((command & CMD_STOP_DUMP) != 0) {
+                if ((command & CMD_START_DUMP) != 0) {
                     adcDataBuffer->SetAbortRequest();
-                    command |= CMD_STOP_DUMP;
-                    break;
-                default :
-                    command |= CMD_UNKNOWN;
-                    break;
+                }
             }
         }
         else {
@@ -151,4 +130,44 @@ static void returnResponse(Packet *packet) {
     uart->write(packet->Data0);
     uart->write(packet->Data1);
     uart->write(calculateChkSum(packet));
+}
+
+static void decodeCommand(uint8_t cmdraw, Command *cmd) {
+    switch (cmdraw) {
+    case OP_SPI_RESET :
+        *cmd |= CMD_RESET;
+        break;
+    case OP_REGISTER_WRITE_8BIT :
+        *cmd |= CMD_WRITE_8BIT;
+        break;
+    case OP_REGISTER_READ_8BIT :
+        *cmd |= CMD_READ_8BIT;
+        break;
+    case OP_REGISTER_WRITE_16BIT :
+        *cmd |= CMD_WRITE_16BIT;
+        break;
+    case OP_REGISTER_READ_16BIT :
+        *cmd |= CMD_READ_16BIT;
+        break;
+    case OP_START_SINGLE_CONVERSION :
+        *cmd |= CMD_START_SINGLE;
+        break;
+    case OP_START_CONTINUOUS_CONVERSION :
+        *cmd |= CMD_START_CONTINUOUS;
+        break;
+    case OP_START_ADC_DATA_DUMP :
+        *cmd |= CMD_START_DUMP;
+        break;
+    case OP_STOP_SINGLE_CONVERSION :
+        *cmd |= CMD_STOP_SINGLE;
+        break;
+    case OP_STOP_CONTINUOUS_CONVERSION :
+        *cmd |= CMD_STOP_CONTINUOUS;
+        break;
+    case OP_STOP_ADC_DATA_DUMP :
+        *cmd |= CMD_STOP_DUMP;
+        break;
+    default :
+        break;
+    }
 }
