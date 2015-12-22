@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "adc_data_buffer.h"
 
 ::ADCDataBuffer::ADCDataBuffer() {

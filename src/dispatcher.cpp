@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "spi_command.h"
 #include "dispatcher.h"
 

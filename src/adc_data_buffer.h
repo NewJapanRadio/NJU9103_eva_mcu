@@ -1,7 +1,7 @@
 #ifndef __ADC_DATA_BUFFER_H__
 #define __ADC_DATA_BUFFER_H__
 
-#include "nju9103_eva.h"
+#include "nju9103_types.h"
 
 class ADCDataBuffer {
     public:

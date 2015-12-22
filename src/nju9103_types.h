@@ -1,7 +1,13 @@
-#ifndef __NJU9103_EVA_H__
-#define __NJU9103_EVA_H__
+#ifndef __NJU9103_TYPES_H__
+#define __NJU9103_TYPES_H__
 
-#include "serial_wrapper.h"
+#ifdef UNIT_TEST
+#   define NJRC_STATIC
+#else
+#   define NJRC_STATIC static
+#endif
+
+#include <stdint.h>
 
 #define MAX_BUFFER_SIZE 0x4000
 

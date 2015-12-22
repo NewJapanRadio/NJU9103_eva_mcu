@@ -1,18 +1,8 @@
 #include <new>
 
-#include "nju9103_eva.h"
-#include "serial_wrapper.h"
-#include "spi_command.h"
-#include "timer_wrapper.h"
-#include "adc_data_buffer.h"
-#include "dispatcher.h"
+#include <string.h>
 
-static void isrRx();
-static void isrPacketWatch();
-static uint8_t calculateChkSum(Packet *packet);
-static uint8_t calculateChkSum(uint8_t *data);
-static void sendPacket(Packet *packet);
-static void decodeCommand(uint8_t header, uint8_t cmdraw, Command *cmd);
+#include "nju9103.h"
 
 static uint8_t rx_buffer[PACKET_SIZE];
 static ReceiveDataStatus receiveDataStatus;
@@ -53,7 +43,7 @@ void loop() {
     }
 }
 
-static void isrRx() {
+NJRC_STATIC void isrRx() {
     static char buf[PACKET_SIZE];
     static uint8_t count = 0;
     while (uart->readable()) {
@@ -73,7 +63,7 @@ static void isrRx() {
     }
 }
 
-static void isrPacketWatch() {
+NJRC_STATIC void isrPacketWatch() {
     if (receiveDataStatus & RX_STATUS_DATA_RECEIVED) {
         receiveDataStatus ^= RX_STATUS_DATA_RECEIVED;
         if ((receiveDataStatus & RX_STATUS_CHKSUM_ERROR) == 0) {
@@ -117,7 +107,7 @@ static void isrPacketWatch() {
     }
 }
 
-static uint8_t calculateChkSum(Packet *packet) {
+NJRC_STATIC uint8_t calculateChkSum(Packet *packet) {
     uint8_t chksum = 0;
     chksum = (chksum + packet->Header) & 0xFF;
     chksum = (chksum + packet->Byte0) & 0xFF;
@@ -131,7 +121,7 @@ static uint8_t calculateChkSum(Packet *packet) {
     return ~chksum;
 }
 
-static uint8_t calculateChkSum(uint8_t *data) {
+NJRC_STATIC uint8_t calculateChkSum(uint8_t *data) {
     uint8_t chksum = 0;
     for (int i = 0; i < PACKET_SIZE; i++) {
         chksum = (chksum + *data++) & 0xFF;
@@ -139,7 +129,7 @@ static uint8_t calculateChkSum(uint8_t *data) {
     return ~chksum;
 }
 
-static void sendPacket(Packet *packet) {
+NJRC_STATIC void sendPacket(Packet *packet) {
     uart->write(packet->Header);
     uart->write(packet->Byte0);
     uart->write(packet->Byte1);
@@ -152,9 +142,9 @@ static void sendPacket(Packet *packet) {
     uart->write(calculateChkSum(packet));
 }
 
-static void decodeCommand(uint8_t header, uint8_t cmdraw, Command *cmd) {
+NJRC_STATIC void decodeCommand(uint8_t header, uint8_t opcode, Command *cmd) {
     if (header == CommandHeader) {
-        switch (cmdraw) {
+        switch (opcode) {
             case OP_SPI_RESET :
                 *cmd |= CMD_RESET;
                 break;
