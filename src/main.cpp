@@ -11,7 +11,7 @@ static void isrRx();
 static void isrPacketWatch();
 static uint8_t calculateChkSum(Packet *packet);
 static uint8_t calculateChkSum(uint8_t *data);
-static void returnResponse(Packet *packet);
+static void sendPacket(Packet *packet);
 static void decodeCommand(uint8_t cmdraw, Command *cmd);
 
 static uint8_t rx_buffer[PACKET_SIZE];
@@ -45,9 +45,9 @@ void loop() {
         status = dispatcher->Dispatch(&command, rx_buffer, &packet, adcDataBuffer);
 
         if (status != ::Dispatcher::Abort) {
-            returnResponse(&packet);
+            sendPacket(&packet);
             if (packet.Type == OP_START_ADC_DATA_DUMP) {
-                adcDataBuffer->Dump(returnResponse);
+                adcDataBuffer->Dump(sendPacket);
             }
         }
     }
@@ -102,17 +102,17 @@ static void isrPacketWatch() {
             packet.Param = 0x00;
             packet.Data0 = 0x00;
             packet.Data1 = 0x00;
-            returnResponse(&packet);
+            sendPacket(&packet);
         }
     }
 }
 
 static uint8_t calculateChkSum(Packet *packet) {
     uint8_t chksum = 0;
-    chksum = (chksum + packet->Type) & 0xFF;
-    chksum = (chksum + packet->Param) & 0xFF;
-    chksum = (chksum + packet->Data0) & 0xFF;
-    chksum = (chksum + packet->Data1) & 0xFF;
+    chksum = (chksum + packet->Byte0) & 0xFF;
+    chksum = (chksum + packet->Byte1) & 0xFF;
+    chksum = (chksum + packet->Byte2) & 0xFF;
+    chksum = (chksum + packet->Byte3) & 0xFF;
     return ~chksum;
 }
 
@@ -124,11 +124,11 @@ static uint8_t calculateChkSum(uint8_t *data) {
     return ~chksum;
 }
 
-static void returnResponse(Packet *packet) {
-    uart->write(packet->Type);
-    uart->write(packet->Param);
-    uart->write(packet->Data0);
-    uart->write(packet->Data1);
+static void sendPacket(Packet *packet) {
+    uart->write(packet->Byte0);
+    uart->write(packet->Byte1);
+    uart->write(packet->Byte2);
+    uart->write(packet->Byte3);
     uart->write(calculateChkSum(packet));
 }
 

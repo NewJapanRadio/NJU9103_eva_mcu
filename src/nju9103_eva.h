@@ -14,6 +14,10 @@ typedef struct {
             uint8_t Type;
             uint8_t Param;
         };
+        struct {
+            uint8_t Byte0;
+            uint8_t Byte1;
+        };
     };
     union {
         uint16_t ADCData1;
@@ -21,6 +25,10 @@ typedef struct {
         struct {
             uint8_t Data0;
             uint8_t Data1;
+        };
+        struct {
+            uint8_t Byte2;
+            uint8_t Byte3;
         };
     };
 } Packet;
