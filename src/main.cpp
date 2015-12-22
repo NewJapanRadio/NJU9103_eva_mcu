@@ -78,7 +78,18 @@ static void isrPacketWatch() {
         receiveDataStatus ^= RX_STATUS_DATA_RECEIVED;
         if ((receiveDataStatus & RX_STATUS_CHKSUM_ERROR) == 0) {
             decodeCommand(rx_buffer[0], rx_buffer[1], &command);
-            if ((command & CMD_STOP_SINGLE) != 0) {
+            if ((command & CMD_RESET) != 0) {
+                if ((command & CMD_START_SINGLE) != 0) {
+                    dispatcher->SetAbortRequest();
+                }
+                if ((command & CMD_START_CONTINUOUS) != 0) {
+                    dispatcher->SetAbortRequest();
+                }
+                if ((command & CMD_START_DUMP) != 0) {
+                    adcDataBuffer->SetAbortRequest();
+                }
+            }
+            else if ((command & CMD_STOP_SINGLE) != 0) {
                 if ((command & CMD_START_SINGLE) != 0) {
                     dispatcher->SetAbortRequest();
                 }
