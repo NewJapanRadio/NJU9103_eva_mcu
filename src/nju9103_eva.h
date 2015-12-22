@@ -5,9 +5,17 @@
 
 #define MAX_BUFFER_SIZE 0x4000
 
-#define PACKET_SIZE 4
+#define PACKET_SIZE 9 // w/o Header
+
+enum PacketType {
+    CommandHeader  = 0x10,
+    ResponseHeader = 0x20,
+    DataHeader     = 0x30,
+    ErrorHeader    = 0xF0
+};
 
 typedef struct {
+    uint8_t Header;
     union {
         uint16_t ADCData0;
         struct {
@@ -29,6 +37,20 @@ typedef struct {
         struct {
             uint8_t Byte2;
             uint8_t Byte3;
+        };
+    };
+    union {
+        uint16_t ADCData2;
+        struct {
+            uint8_t Byte4;
+            uint8_t Byte5;
+        };
+    };
+    union {
+        uint16_t ADCData3;
+        struct {
+            uint8_t Byte6;
+            uint8_t Byte7;
         };
     };
 } Packet;
