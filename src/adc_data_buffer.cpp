@@ -1,6 +1,8 @@
 #include "adc_data_buffer.h"
 
 ::ADCDataBuffer::ADCDataBuffer() {
+    allocatedSize = 0;
+    abortRequest = false;
 }
 
 ::ADCDataBuffer::~ADCDataBuffer() {
