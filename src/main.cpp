@@ -1,5 +1,3 @@
-#include <new>
-
 #include <string.h>
 
 #include "nju9103.h"
@@ -8,23 +6,18 @@ static uint8_t rx_buffer[PACKET_SIZE];
 static ReceiveDataStatus receiveDataStatus;
 static Command command;
 
-static ::Serial *uart;
-static ::Timer *packetWatchTimer;
-static ::Dispatcher *dispatcher;
-static ::ADCDataBuffer *adcDataBuffer;
+static ::Serial uart(UART_BAUDRATE, UART_BITS, UART_PARITY, UART_STOP);
+static ::Timer packetWatchTimer;
+static ::Dispatcher dispatcher;
+static ::ADCDataBuffer adcDataBuffer;
 
 void setup() {
     receiveDataStatus = 0;
     command = 0;
 
-    uart = new ::Serial(UART_BAUDRATE, UART_BITS, UART_PARITY, UART_STOP);
-    packetWatchTimer = new ::Timer();
-    dispatcher = new ::Dispatcher();
-    adcDataBuffer = new ::ADCDataBuffer;
-
     // set Rx interrupt
-    uart->attach(isrRx, ::Serial::RxIrq);
-    packetWatchTimer->attach(isrPacketWatch, 300);
+    uart.attach(isrRx, ::Serial::RxIrq);
+    packetWatchTimer.attach(isrPacketWatch, 300);
 }
 
 void loop() {
@@ -32,12 +25,12 @@ void loop() {
 
     if (command != 0) {
         ::Dispatcher::Status status;
-        status = dispatcher->Dispatch(&command, rx_buffer, &packet, adcDataBuffer);
+        status = dispatcher.Dispatch(&command, rx_buffer, &packet, &adcDataBuffer);
 
         if (status != ::Dispatcher::Abort) {
             sendPacket(&packet);
             if (packet.Type == OP_START_ADC_DATA_DUMP) {
-                adcDataBuffer->Dump(sendPacket);
+                adcDataBuffer.Dump(sendPacket);
             }
         }
     }
@@ -46,13 +39,13 @@ void loop() {
 NJRC_STATIC void isrRx() {
     static char buf[PACKET_SIZE];
     static uint8_t count = 0;
-    while (uart->readable()) {
+    while (uart.readable()) {
         if (count < sizeof(buf)) {
-            buf[count] = uart->read();
+            buf[count] = uart.read();
         }
         else if (count == sizeof(buf)) {
             receiveDataStatus = RX_STATUS_DATA_RECEIVED;
-            if (uart->read() == calculateChkSum((uint8_t*)buf)) {
+            if (uart.read() == calculateChkSum((uint8_t*)buf)) {
                 memcpy(rx_buffer, buf, sizeof(uint8_t) * PACKET_SIZE);
             }
             else {
@@ -70,28 +63,28 @@ NJRC_STATIC void isrPacketWatch() {
             decodeCommand(rx_buffer[0], rx_buffer[1], &command);
             if ((command & CMD_RESET) != 0) {
                 if ((command & CMD_START_SINGLE) != 0) {
-                    dispatcher->SetAbortRequest();
+                    dispatcher.SetAbortRequest();
                 }
                 if ((command & CMD_START_CONTINUOUS) != 0) {
-                    dispatcher->SetAbortRequest();
+                    dispatcher.SetAbortRequest();
                 }
                 if ((command & CMD_START_DUMP) != 0) {
-                    adcDataBuffer->SetAbortRequest();
+                    adcDataBuffer.SetAbortRequest();
                 }
             }
             else if ((command & CMD_STOP_SINGLE) != 0) {
                 if ((command & CMD_START_SINGLE) != 0) {
-                    dispatcher->SetAbortRequest();
+                    dispatcher.SetAbortRequest();
                 }
             }
             else if ((command & CMD_STOP_CONTINUOUS) != 0) {
                 if ((command & CMD_START_CONTINUOUS) != 0) {
-                    dispatcher->SetAbortRequest();
+                    dispatcher.SetAbortRequest();
                 }
             }
             else if ((command & CMD_STOP_DUMP) != 0) {
                 if ((command & CMD_START_DUMP) != 0) {
-                    adcDataBuffer->SetAbortRequest();
+                    adcDataBuffer.SetAbortRequest();
                 }
             }
         }
@@ -130,16 +123,16 @@ NJRC_STATIC uint8_t calculateChkSum(uint8_t *data) {
 }
 
 NJRC_STATIC void sendPacket(Packet *packet) {
-    uart->write(packet->Header);
-    uart->write(packet->Byte0);
-    uart->write(packet->Byte1);
-    uart->write(packet->Byte2);
-    uart->write(packet->Byte3);
-    uart->write(packet->Byte4);
-    uart->write(packet->Byte5);
-    uart->write(packet->Byte6);
-    uart->write(packet->Byte7);
-    uart->write(calculateChkSum(packet));
+    uart.write(packet->Header);
+    uart.write(packet->Byte0);
+    uart.write(packet->Byte1);
+    uart.write(packet->Byte2);
+    uart.write(packet->Byte3);
+    uart.write(packet->Byte4);
+    uart.write(packet->Byte5);
+    uart.write(packet->Byte6);
+    uart.write(packet->Byte7);
+    uart.write(calculateChkSum(packet));
 }
 
 NJRC_STATIC void decodeCommand(uint8_t header, uint8_t opcode, Command *cmd) {
