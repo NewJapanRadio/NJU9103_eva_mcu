@@ -1,27 +1,27 @@
 OBJDIR = build
 
-TESTTOP = unittest1.exe unittest2.exe
+TESTTOP = unittest.exe
 
-TEST = unittest1.o unittest2.o
-DUT  = main.o dispatcher.o spi_command.o adc_data_buffer.o
-MOCK = rdyb_wrapper.o serial_wrapper.o spi_wrapper.o timer_wrapper.o 
-OBJ  = testtop.o gtest-all.o
+TESTOBJ = unittest1.o unittest_spi_command.o
+DUT     = main.o dispatcher.o spi_command.o adc_data_buffer.o
+MOCK    = serial_wrapper.o timer_wrapper.o
+OBJ     = testtop.o gtest-all.o gmock-all.o
 
 CC = gcc
 RM = rm -f
 AR = ar
 LD = g++
 
-INCLUDE = -Igoogletest -Igoogletest/include -I../src -Imock
-CFLAGS = -O0 -g -DUNIT_TEST -DGTEST_OS_WINDOWS -D_WIN32_WINNT=0x0500
+INCLUDE = -Igoogletest -Igoogletest/include -Igooglemock -Igooglemock/include -I../src -Imock
+CFLAGS = -O0 -g -DUNIT_TEST
 LDFLAGS = -fprofile-arcs -lstdc++
 
 test : $(addprefix $(OBJDIR)/, $(TESTTOP))
 
 clean :
-	$(RM) $(addprefix $(OBJDIR)/, $(TESTTOP) $(TEST) $(DUT) $(MOCK) $(OBJ) *.gcno *.gcda *.gcov)
+	$(RM) $(addprefix $(OBJDIR)/, $(TESTTOP) $(TESTOBJ) $(DUT) $(MOCK) $(OBJ) *.gcno *.gcda *.gcov)
 
-$(OBJDIR)/%.exe : $(addprefix $(OBJDIR)/, %.o $(DUT) $(MOCK) $(OBJ))
+$(OBJDIR)/%.exe : $(addprefix $(OBJDIR)/, $(TESTOBJ) $(DUT) $(MOCK) $(OBJ))
 	@if [ ! -d $(OBJDIR) ]; \
 		then echo "mkdir -p $(OBJDIR)"; mkdir -p $(OBJDIR); \
 		fi
@@ -29,6 +29,12 @@ $(OBJDIR)/%.exe : $(addprefix $(OBJDIR)/, %.o $(DUT) $(MOCK) $(OBJ))
 	$@
 
 $(OBJDIR)/%.o : googletest/src/%.cc
+	@if [ ! -d $(OBJDIR) ]; \
+		then echo "mkdir -p $(OBJDIR)"; mkdir -p $(OBJDIR); \
+		fi
+	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
+
+$(OBJDIR)/%.o : googlemock/src/%.cc
 	@if [ ! -d $(OBJDIR) ]; \
 		then echo "mkdir -p $(OBJDIR)"; mkdir -p $(OBJDIR); \
 		fi

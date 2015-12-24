@@ -3,10 +3,12 @@
 
 #include <stdint.h>
 
-class SPI {
-    protected:
-        int bytes() { return 8; };
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
+using ::testing::_;
+
+class SPI {
     public:
         enum SpiMode {
             Mode0 = 0,
@@ -15,12 +17,16 @@ class SPI {
             Mode3
         };
 
-        SPI();
-        ~SPI();
-
-        uint8_t write(uint8_t wd);
-        void mode(SpiMode mode);
-        void frequency(uint64_t freq);
+        SPI() {
+            EXPECT_CALL(*this, mode(_));
+            EXPECT_CALL(*this, frequency(_));
+        }
+        MOCK_METHOD1(write,
+                uint8_t(uint8_t wd));
+        MOCK_METHOD1(mode,
+                void(SpiMode mode));
+        MOCK_METHOD1(frequency,
+                void(uint64_t freq));
 };
 
 #endif
