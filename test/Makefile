@@ -5,7 +5,7 @@ TESTTOP = unittest.exe
 TESTOBJ = unittest1.o unittest_spi_command.o
 DUT     = main.o dispatcher.o spi_command.o adc_data_buffer.o
 MOCK    = serial_wrapper.o timer_wrapper.o
-OBJ     = testtop.o gtest-all.o gmock-all.o
+OBJ     = gtest_main.o gtest-all.o gmock-all.o
 
 CC = gcc
 RM = rm -f
