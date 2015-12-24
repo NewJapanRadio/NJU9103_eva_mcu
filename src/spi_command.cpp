@@ -12,6 +12,7 @@
 }
 
 ::SPICommand::~SPICommand() {
+    delete rdyb;
     delete spi;
 }
 
