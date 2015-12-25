@@ -11,12 +11,12 @@
 /**
  * @brief executed once
  */
-NJRC_STATIC void setup();
+extern void setup();
 
 /**
  * @brief executed consecutively
  */
-NJRC_STATIC void loop();
+extern void loop();
 
 /**
  * @brief UART Rx event handler
