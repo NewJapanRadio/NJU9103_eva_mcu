@@ -3,6 +3,9 @@
 
 #include "adc_data_buffer.h"
 
+/** @class Dispatcher
+    @brief parse received command and dispatch a command
+*/
 class Dispatcher {
     public:
         enum Status {
@@ -15,7 +18,25 @@ class Dispatcher {
         Dispatcher();
         ~Dispatcher();
 
+        /**
+         * @brief parse and dispatch a command
+         * @return result status
+         * @param [in] command
+         * @param [in] rx_buffer
+         * @param [out] packet
+         * @param [out] adcDataBuffer
+         * @retval Success
+         * @retval Abort
+         *      a conversion is aborted with SetAbortRequest()
+         * @retval Error
+         *      parameter error
+         *
+         */
         Status Dispatch(Command *command, uint8_t *rx_buffer, Packet *packet, ::ADCDataBuffer *adcDataBuffer);
+
+        /**
+         * @brief set abort request for dispatched command
+         */
         void SetAbortRequest();
 
     private:
