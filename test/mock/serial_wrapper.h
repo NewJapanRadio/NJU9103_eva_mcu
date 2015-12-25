@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-using ::testing::_;
+using namespace ::testing;
 
 class Serial {
     public:

@@ -2,7 +2,7 @@ OBJDIR = build
 
 TESTTOP = unittest.exe
 
-TESTOBJ = unittest_dummy.o unittest1.o unittest_spi_command.o
+TESTOBJ = unittest_dummy.o unittest_spi_command.o unittest_main.o unittest_uart.o
 DUT     = main.o dispatcher.o spi_command.o adc_data_buffer.o
 MOCK    = timer_wrapper.o
 OBJ     = gtest_main.o gtest-all.o gmock-all.o
@@ -14,7 +14,7 @@ LD = g++
 
 INCLUDE = -Igoogletest -Igoogletest/include -Igooglemock -Igooglemock/include -I../src -Imock
 CFLAGS = -O0 -g -DUNIT_TEST
-LDFLAGS = -fprofile-arcs -lstdc++
+LDFLAGS = -fprofile-arcs
 
 test : $(addprefix $(OBJDIR)/, $(TESTTOP))
 
@@ -50,7 +50,7 @@ $(OBJDIR)/%.o : ../src/%.cpp
 	@if [ ! -d $(OBJDIR) ]; \
 		then echo "mkdir -p $(OBJDIR)"; mkdir -p $(OBJDIR); \
 		fi
-	$(CC) $(CFLAGS) -fprofile-arcs -ftest-coverage $(INCLUDE) -c $< -o $@
+	$(CC) $(CFLAGS) -coverage $(INCLUDE) -c $< -o $@
 
 $(OBJDIR)/%.o : mock/%.cpp
 	@if [ ! -d $(OBJDIR) ]; \
