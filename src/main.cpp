@@ -36,7 +36,7 @@ void loop() {
     }
 }
 
-NJRC_STATIC void isrRx() {
+void isrRx() {
     static char buf[PACKET_SIZE];
     static uint8_t count = 0;
     while (uart.readable()) {
@@ -56,7 +56,7 @@ NJRC_STATIC void isrRx() {
     }
 }
 
-NJRC_STATIC void isrPacketWatch() {
+void isrPacketWatch() {
     if (receiveDataStatus & RX_STATUS_DATA_RECEIVED) {
         receiveDataStatus ^= RX_STATUS_DATA_RECEIVED;
         if ((receiveDataStatus & RX_STATUS_CHKSUM_ERROR) == 0) {
@@ -100,7 +100,7 @@ NJRC_STATIC void isrPacketWatch() {
     }
 }
 
-NJRC_STATIC uint8_t calculateChkSum(Packet *packet) {
+uint8_t calculateChkSum(Packet *packet) {
     uint8_t chksum = 0;
     chksum = (chksum + packet->Header) & 0xFF;
     chksum = (chksum + packet->Byte0) & 0xFF;
@@ -114,7 +114,7 @@ NJRC_STATIC uint8_t calculateChkSum(Packet *packet) {
     return ~chksum;
 }
 
-NJRC_STATIC uint8_t calculateChkSum(uint8_t *data) {
+uint8_t calculateChkSum(uint8_t *data) {
     uint8_t chksum = 0;
     for (int i = 0; i < PACKET_SIZE; i++) {
         chksum = (chksum + *data++) & 0xFF;
@@ -122,7 +122,7 @@ NJRC_STATIC uint8_t calculateChkSum(uint8_t *data) {
     return ~chksum;
 }
 
-NJRC_STATIC void sendPacket(Packet *packet) {
+void sendPacket(Packet *packet) {
     uart.write(packet->Header);
     uart.write(packet->Byte0);
     uart.write(packet->Byte1);
@@ -135,7 +135,7 @@ NJRC_STATIC void sendPacket(Packet *packet) {
     uart.write(calculateChkSum(packet));
 }
 
-NJRC_STATIC void decodeCommand(uint8_t header, uint8_t opcode, Command *cmd) {
+void decodeCommand(uint8_t header, uint8_t opcode, Command *cmd) {
     if (header == CommandHeader) {
         switch (opcode) {
             case OP_SPI_RESET :

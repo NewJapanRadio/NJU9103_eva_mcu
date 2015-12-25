@@ -8,6 +8,9 @@
 #include "adc_data_buffer.h"
 #include "dispatcher.h"
 
+NJRC_STATIC void setup();
+NJRC_STATIC void loop();
+
 NJRC_STATIC void isrRx();
 NJRC_STATIC void isrPacketWatch();
 NJRC_STATIC uint8_t calculateChkSum(Packet *packet);
