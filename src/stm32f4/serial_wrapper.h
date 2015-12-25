@@ -5,20 +5,12 @@
 
 class Serial {
     public:
-        enum Parity {
-            None = 0,
-            Odd,
-            Even,
-            Forced1,
-            Forced0
-        };
-
         enum IrqType {
             RxIrq = 0,
             TxIrq
         };
 
-        Serial(int32_t baud, int32_t bits, Parity parity, int32_t stop);
+        Serial();
         ~Serial();
 
         uint8_t read();

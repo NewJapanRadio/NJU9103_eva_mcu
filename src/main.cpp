@@ -2,14 +2,14 @@
 
 #include "nju9103.h"
 
-static uint8_t rx_buffer[PACKET_SIZE];
-static ReceiveDataStatus receiveDataStatus;
-static Command command;
+NJRC_STATIC uint8_t rx_buffer[PACKET_SIZE];
+NJRC_STATIC ReceiveDataStatus receiveDataStatus;
+NJRC_STATIC Command command;
 
-static ::Serial uart(UART_BAUDRATE, UART_BITS, UART_PARITY, UART_STOP);
-static ::Timer packetWatchTimer;
-static ::Dispatcher dispatcher;
-static ::ADCDataBuffer adcDataBuffer;
+NJRC_STATIC ::Serial uart;
+NJRC_STATIC ::Timer packetWatchTimer;
+NJRC_STATIC ::Dispatcher dispatcher;
+NJRC_STATIC ::ADCDataBuffer adcDataBuffer;
 
 void setup() {
     receiveDataStatus = 0;

@@ -1,31 +1,14 @@
 #include "serial_wrapper.h"
 
-::Serial::Serial(int32_t baud, int32_t bits, Parity parity, int32_t stop) {
-    mbed::Serial::Parity mbedParity;
-    switch (parity) {
-        case None:
-            mbedParity = mbed::Serial::None;
-            break;
-        case Odd:
-            mbedParity = mbed::Serial::Odd;
-            break;
-        case Even:
-            mbedParity = mbed::Serial::Even;
-            break;
-        case Forced1:
-            mbedParity = mbed::Serial::Forced1;
-            break;
-        case Forced0:
-            mbedParity = mbed::Serial::Forced0;
-            break;
-        default:
-            mbedParity = mbed::Serial::None;
-            break;
-    }
+#define UART_BAUDRATE 115200
+#define UART_BITS 8
+#define UART_PARITY mbed::Serial::None
+#define UART_STOP 1
 
+::Serial::Serial() {
     serial = new mbed::Serial(USBTX, USBRX);
-    serial->baud(baud);
-    serial->format(bits, mbedParity, stop);
+    serial->baud(UART_BAUDRATE);
+    serial->format(UART_BITS, UART_PARITY, UART_STOP);
 }
 
 ::Serial::~Serial() {

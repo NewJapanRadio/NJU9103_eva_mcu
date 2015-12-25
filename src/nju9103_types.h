@@ -2,7 +2,7 @@
 #define __NJU9103_TYPES_H__
 
 #ifdef UNIT_TEST
-#   define NJRC_STATIC
+#   define NJRC_STATIC extern
 #else
 #   define NJRC_STATIC static
 #endif
@@ -60,11 +60,6 @@ typedef struct {
         };
     };
 } Packet;
-
-#define UART_BAUDRATE 115200
-#define UART_BITS 8
-#define UART_PARITY ::Serial::None
-#define UART_STOP 1
 
 /* Operation Code */
 #define OP_SPI_RESET                   0x00
