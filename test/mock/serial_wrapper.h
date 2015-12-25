@@ -3,31 +3,34 @@
 
 #include <stdint.h>
 
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
+
+using ::testing::_;
+
 class Serial {
     public:
-        enum Parity {
-            None = 0,
-            Odd,
-            Even,
-            Forced1,
-            Forced0
-        };
-
         enum IrqType {
             RxIrq = 0,
             TxIrq
         };
 
-        Serial(int32_t baud, int32_t bits, Parity parity, int32_t stop);
-        ~Serial();
+        Serial() { }
 
-        uint8_t read();
-        int8_t  readable();
-        int8_t  writeable();
-        void    write(const uint8_t data);
-        void    print(const char* str);
-        void    println(const char* str);
-        void    attach(void (*fptr)(void), IrqType type);
+        MOCK_METHOD0(read,
+            uint8_t());
+        MOCK_METHOD0(readable,
+            int8_t());
+        MOCK_METHOD0(writeable,
+            int8_t());
+        MOCK_METHOD1(write,
+            void(const uint8_t data));
+        MOCK_METHOD1(print,
+            void(const char* str));
+        MOCK_METHOD1(println,
+            void(const char* str));
+        MOCK_METHOD2(attach,
+            void(void (*fptr)(void), IrqType type));
 };
 
 #endif

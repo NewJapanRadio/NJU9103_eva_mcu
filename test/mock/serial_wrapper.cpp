@@ -1,6 +1,6 @@
 #include "serial_wrapper.h"
 
-::Serial::Serial(int32_t baud, int32_t bits, Parity parity, int32_t stop) {
+::Serial::Serial() {
 }
 
 ::Serial::~Serial() {

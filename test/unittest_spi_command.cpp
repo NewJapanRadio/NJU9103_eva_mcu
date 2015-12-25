@@ -247,14 +247,43 @@ TEST(SPICommand, Abort_StartContinuousConversion) {
 
     // emulate rdyb wait
     EXPECT_CALL(*spiCommand.rdyb, read())
-        .WillRepeatedly(Return(1));
+        .Times(AtLeast(3 * (0x6+1)))
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 1
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 2
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 3
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 4
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 5
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 6
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(DoAll(InvokeWithoutArgs(&spiCommand, &SPICommand::SetAbortRequest), Return(1)));// 7
 
     {
         InSequence s;
         EXPECT_CALL(*spiCommand.spi, write(0x00));       // WriteCommand, CTRL Register Address
         EXPECT_CALL(*spiCommand.spi, write(chsel_mode)); // CTRL Register Value
-        spiCommand.SetAbortRequest();
+        EXPECT_CALL(*spiCommand.spi, write(0x1C));       // { addr[3:0], RW = 1, BC = 1, 0b00 }
+        EXPECT_CALL(*spiCommand.spi, write(_)).Times(Exactly(2)).WillOnce(Return(0x01)).WillOnce(Return(0x23));
+        EXPECT_CALL(*spiCommand.spi, write(0x1C));       // { addr[3:0], RW = 1, BC = 1, 0b00 }
+        EXPECT_CALL(*spiCommand.spi, write(_)).Times(Exactly(2)).WillOnce(Return(0x45)).WillOnce(Return(0x67));
+        EXPECT_CALL(*spiCommand.spi, write(0x1C));       // { addr[3:0], RW = 1, BC = 1, 0b00 }
+        EXPECT_CALL(*spiCommand.spi, write(_)).Times(Exactly(2)).WillOnce(Return(0x89)).WillOnce(Return(0xAB));
+        EXPECT_CALL(*spiCommand.spi, write(0x1C));       // { addr[3:0], RW = 1, BC = 1, 0b00 }
+        EXPECT_CALL(*spiCommand.spi, write(_)).Times(Exactly(2)).WillOnce(Return(0xCD)).WillOnce(Return(0xEF));
+        EXPECT_CALL(*spiCommand.spi, write(0x1C));       // { addr[3:0], RW = 1, BC = 1, 0b00 }
+        EXPECT_CALL(*spiCommand.spi, write(_)).Times(Exactly(2)).WillOnce(Return(0xED)).WillOnce(Return(0xCB));
+        EXPECT_CALL(*spiCommand.spi, write(0x1C));       // { addr[3:0], RW = 1, BC = 1, 0b00 }
+        EXPECT_CALL(*spiCommand.spi, write(_)).Times(Exactly(2)).WillOnce(Return(0xA9)).WillOnce(Return(0x87));
+        // StartContinuousConversion will be aborted and followings are not called.
+        // EXPECT_CALL(*spiCommand.spi, write(0x1C));       // { addr[3:0], RW = 1, BC = 1, 0b00 }
+        // EXPECT_CALL(*spiCommand.spi, write(_)).Times(Exactly(2)).WillOnce(Return(0x65)).WillOnce(Return(0x43));
     }
 
     EXPECT_EQ(SPICommand::Abort, spiCommand.StartContinuousConversion(chsel_mode, rd, 0x6, &len));
+    EXPECT_EQ(6, len);
+    EXPECT_EQ(0x0123, rd[0]);
+    EXPECT_EQ(0x4567, rd[1]);
+    EXPECT_EQ(0x89AB, rd[2]);
+    EXPECT_EQ(0xCDEF, rd[3]);
+    EXPECT_EQ(0xEDCB, rd[4]);
+    EXPECT_EQ(0xA987, rd[5]);
+    EXPECT_EQ(0x0000, rd[6]);
 }
