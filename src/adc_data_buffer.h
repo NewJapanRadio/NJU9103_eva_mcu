@@ -1,7 +1,7 @@
 #ifndef __ADC_DATA_BUFFER_H__
 #define __ADC_DATA_BUFFER_H__
 
-#include "nju9103_types.h"
+#include "types.h"
 
 /** @class ADCDataBuffer
     @brief data buffer for continuously conversion

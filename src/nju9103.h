@@ -1,7 +1,7 @@
 #ifndef __NJU9103_H__
 #define __NJU9103_H__
 
-#include "nju9103_types.h"
+#include "types.h"
 #include "serial_wrapper.h"
 #include "spi_command.h"
 #include "timer_wrapper.h"
