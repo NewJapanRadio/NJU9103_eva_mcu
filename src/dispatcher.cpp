@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 
 #include "spi_command.h"
 #include "dispatcher.h"
@@ -111,7 +112,8 @@ static bool validateCtrl(uint8_t ctrl);
                     packet->Header = ResponseHeader;
                     packet->OpCode = OP_START_SINGLE_CONVERSION;
                     packet->Param = args->Param;
-                    packet->Data = rd;
+                    packet->Data0 = (uint8_t)(rd >> 8);
+                    packet->Data1 = (uint8_t)(rd & 0x00FF);
                 }
                 else if (spiStatus == ::SPICommand::Abort) {
                     status = Abort;
@@ -126,7 +128,7 @@ static bool validateCtrl(uint8_t ctrl);
         }
         else if (*command & CMD_START_CONTINUOUS) {
             if (validateCtrl(args->Param)) {
-                uint32_t length = (uint16_t)((args->Byte3 << 8) + args->Byte4);
+                uint32_t length = (uint16_t)((args->Byte2 << 8) + args->Byte3);
 
                 if (adcDataBuffer->Alloc(length + 1)) {
                     uint16_t resultLength = 0;
@@ -163,7 +165,6 @@ static bool validateCtrl(uint8_t ctrl);
             packet->OpCode = OP_START_ADC_DATA_DUMP;
             packet->Data0 = (uint8_t)(length >> 8);
             packet->Data1 = (uint8_t)(length & 0x00FF);
-            *command ^= CMD_START_DUMP;
         }
         else if (*command & CMD_STOP_SINGLE) {
             packet->Header = ResponseHeader;

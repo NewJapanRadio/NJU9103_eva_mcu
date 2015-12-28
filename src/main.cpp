@@ -31,6 +31,7 @@ void loop() {
             sendPacket(&packet);
             if (packet.OpCode == OP_START_ADC_DATA_DUMP) {
                 adcDataBuffer.Dump(sendPacket);
+                command ^= CMD_START_DUMP;
             }
         }
     }

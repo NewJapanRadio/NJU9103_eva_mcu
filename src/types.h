@@ -23,42 +23,25 @@ enum PacketType {
 typedef struct {
     uint8_t Header;
     union {
-        uint16_t ADCData0;
-        struct {
-            uint8_t OpCode;
-            uint8_t Param;
-        };
-        struct {
-            uint8_t Byte0;
-            uint8_t Byte1;
-        };
+        uint8_t Byte0;
+        uint8_t OpCode;
     };
     union {
-        uint16_t ADCData1;
-        uint16_t Data;
-        struct {
-            uint8_t Data0;
-            uint8_t Data1;
-        };
-        struct {
-            uint8_t Byte2;
-            uint8_t Byte3;
-        };
+        uint8_t Byte1;
+        uint8_t Param;
     };
     union {
-        uint16_t ADCData2;
-        struct {
-            uint8_t Byte4;
-            uint8_t Byte5;
-        };
+        uint8_t Byte2;
+        uint8_t Data0;
     };
     union {
-        uint16_t ADCData3;
-        struct {
-            uint8_t Byte6;
-            uint8_t Byte7;
-        };
+        uint8_t Byte3;
+        uint8_t Data1;
     };
+    uint8_t Byte4;
+    uint8_t Byte5;
+    uint8_t Byte6;
+    uint8_t Byte7;
 } Packet;
 
 /* Operation Code */
