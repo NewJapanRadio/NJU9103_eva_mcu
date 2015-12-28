@@ -18,6 +18,8 @@ class ADCDataBuffer {
          * This function validates required size,
          * and take an alignment to 8byte.
          *
+         * @param [in] size
+         *      allocation memory size
          * @return success and failure
          * @retval true
          * @retval false
@@ -28,7 +30,7 @@ class ADCDataBuffer {
         /**
          * @brief dump ADC data buffer
          *
-         * @param pfSendPacket
+         * @param [in] pfSendPacket
          *      data is send via given function
          */
         void Dump(void (*pfSendPacket)(Packet *));
@@ -50,6 +52,9 @@ class ADCDataBuffer {
          * Meaning of this function existence is
          * to save number of converted ADC data
          * to return dumped data length at StartADCDataDump.
+         *
+         * @param [in] length
+         *      set allocated memory size
          */
         void SetDataLength(uint16_t length);
 

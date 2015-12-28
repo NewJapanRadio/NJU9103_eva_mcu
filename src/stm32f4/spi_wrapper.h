@@ -27,7 +27,7 @@ class SPI {
         /**
          * @brief send data
          *
-         * @param [in] data
+         * @param [in] wd
          *      data for send
          *
          * @return read data
