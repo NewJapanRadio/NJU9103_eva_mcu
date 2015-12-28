@@ -21,6 +21,10 @@ test : $(addprefix $(OBJDIR)/, $(TESTTOP))
 clean :
 	$(RM) $(addprefix $(OBJDIR)/, $(TESTTOP) $(TESTOBJ) $(DUT) $(MOCK) $(OBJ) *.gcno *.gcda *.gcov)
 
+report :
+	lcov -c -d build -o build/coverage.info --rc lcov_branch_coverage=1
+	genhtml build/coverage.info -o build/report --branch-coverage
+
 $(OBJDIR)/%.exe : $(addprefix $(OBJDIR)/, $(TESTOBJ) $(DUT) $(MOCK) $(OBJ))
 	@if [ ! -d $(OBJDIR) ]; \
 		then echo "mkdir -p $(OBJDIR)"; mkdir -p $(OBJDIR); \
