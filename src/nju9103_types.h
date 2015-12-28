@@ -11,7 +11,7 @@
 
 #define MAX_BUFFER_SIZE 0x4000
 
-#define PACKET_SIZE 9 // w/o Header
+#define PACKET_SIZE 9 // w/o CheckSum
 
 enum PacketType {
     CommandHeader  = 0x10,
@@ -25,7 +25,7 @@ typedef struct {
     union {
         uint16_t ADCData0;
         struct {
-            uint8_t Type;
+            uint8_t OpCode;
             uint8_t Param;
         };
         struct {

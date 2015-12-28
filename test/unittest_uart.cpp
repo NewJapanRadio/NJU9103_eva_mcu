@@ -10,7 +10,7 @@
 
 using namespace ::testing;
 
-extern uint8_t rx_buffer[PACKET_SIZE];
+extern Packet rxPacket;
 extern ReceiveDataStatus receiveDataStatus;
 extern Command command;
 

@@ -2,7 +2,7 @@
 
 #include "nju9103.h"
 
-NJRC_STATIC uint8_t rx_buffer[PACKET_SIZE];
+NJRC_STATIC Packet rxPacket;
 NJRC_STATIC ReceiveDataStatus receiveDataStatus;
 NJRC_STATIC Command command;
 
@@ -25,11 +25,11 @@ void loop() {
 
     if (command != 0) {
         ::Dispatcher::Status status;
-        status = dispatcher.Dispatch(&command, rx_buffer, &packet, &adcDataBuffer);
+        status = dispatcher.Dispatch(&command, &rxPacket, &packet, &adcDataBuffer);
 
         if (status != ::Dispatcher::Abort) {
             sendPacket(&packet);
-            if (packet.Type == OP_START_ADC_DATA_DUMP) {
+            if (packet.OpCode == OP_START_ADC_DATA_DUMP) {
                 adcDataBuffer.Dump(sendPacket);
             }
         }
@@ -46,7 +46,15 @@ void isrRx() {
         else if (count == sizeof(buf)) {
             receiveDataStatus = RX_STATUS_DATA_RECEIVED;
             if (uart.read() == calculateChkSum((uint8_t*)buf)) {
-                memcpy(rx_buffer, buf, sizeof(uint8_t) * PACKET_SIZE);
+                rxPacket.Header = buf[0];
+                rxPacket.OpCode = buf[1];
+                rxPacket.Param  = buf[2];
+                rxPacket.Byte2  = buf[3];
+                rxPacket.Byte3  = buf[4];
+                rxPacket.Byte4  = buf[5];
+                rxPacket.Byte5  = buf[6];
+                rxPacket.Byte6  = buf[7];
+                rxPacket.Byte7  = buf[8];
             }
             else {
                 receiveDataStatus |= RX_STATUS_CHKSUM_ERROR;
@@ -60,7 +68,7 @@ void isrPacketWatch() {
     if (receiveDataStatus & RX_STATUS_DATA_RECEIVED) {
         receiveDataStatus ^= RX_STATUS_DATA_RECEIVED;
         if ((receiveDataStatus & RX_STATUS_CHKSUM_ERROR) == 0) {
-            decodeCommand(rx_buffer[0], rx_buffer[1], &command);
+            decodeCommand(&rxPacket, &command);
             if ((command & CMD_RESET) != 0) {
                 if ((command & CMD_START_SINGLE) != 0) {
                     dispatcher.SetAbortRequest();
@@ -94,7 +102,7 @@ void isrPacketWatch() {
             Packet packet;
             memset(&packet, 0, sizeof(Packet));
             packet.Header = ErrorHeader;
-            packet.Type = OP_CHKSUM_ERROR;
+            packet.OpCode = OP_CHKSUM_ERROR;
             sendPacket(&packet);
         }
     }
@@ -135,9 +143,9 @@ void sendPacket(Packet *packet) {
     uart.write(calculateChkSum(packet));
 }
 
-void decodeCommand(uint8_t header, uint8_t opcode, Command *cmd) {
-    if (header == CommandHeader) {
-        switch (opcode) {
+void decodeCommand(Packet *args, Command *cmd) {
+    if (args->Header == CommandHeader) {
+        switch (args->OpCode) {
             case OP_SPI_RESET :
                 *cmd |= CMD_RESET;
                 break;

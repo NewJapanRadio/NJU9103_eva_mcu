@@ -22,7 +22,7 @@ class Dispatcher {
          * @brief parse and dispatch a command
          * @return result status
          * @param [in] command
-         * @param [in] rx_buffer
+         * @param [in] args
          * @param [out] packet
          * @param [out] adcDataBuffer
          * @retval Success
@@ -32,7 +32,7 @@ class Dispatcher {
          *      parameter error
          *
          */
-        Status Dispatch(Command *command, uint8_t *rx_buffer, Packet *packet, ::ADCDataBuffer *adcDataBuffer);
+        Status Dispatch(Command *command, Packet *args, Packet *packet, ::ADCDataBuffer *adcDataBuffer);
 
         /**
          * @brief set abort request for dispatched command

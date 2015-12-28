@@ -48,6 +48,6 @@ NJRC_STATIC void sendPacket(Packet *packet);
 /**
  * @brief decode OP Code to Command
  */
-NJRC_STATIC void decodeCommand(uint8_t header, uint8_t opcode, Command *cmd);
+NJRC_STATIC void decodeCommand(Packet *args, Command *cmd);
 
 #endif
