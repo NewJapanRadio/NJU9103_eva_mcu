@@ -61,7 +61,18 @@ void isrRx() {
                 receiveDataStatus |= RX_STATUS_CHKSUM_ERROR;
             }
         }
-        count = (count + 1) % (sizeof(buf) + 1);
+
+        // UART Reset by consecutive 0x00
+        bool compress = 0x00;
+        for (int i = 0; i < PACKET_SIZE; i++) {
+            compress |= buf[i];
+        }
+        if (compress == 0x00) {
+            count = 0;
+        }
+        else {
+            count = (count + 1) % (sizeof(buf) + 1);
+        }
     }
 }
 
