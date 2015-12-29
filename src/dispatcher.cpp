@@ -42,8 +42,8 @@ static bool validateCtrl(uint8_t ctrl);
             }
             else {
                 packet->OpCode = OP_PARAMETER_ERROR;
-                packet->Byte2 = OP_REGISTER_WRITE_8BIT;
-                packet->Byte3 = args->Param;
+                packet->Byte1 = OP_REGISTER_WRITE_8BIT;
+                packet->Byte2 = args->Param;
             }
             *command ^= CMD_WRITE_8BIT;
         }
@@ -60,8 +60,8 @@ static bool validateCtrl(uint8_t ctrl);
             }
             else {
                 packet->OpCode = OP_PARAMETER_ERROR;
-                packet->Byte2 = OP_REGISTER_READ_8BIT;
-                packet->Byte3 = args->Param;
+                packet->Byte1 = OP_REGISTER_READ_8BIT;
+                packet->Byte2 = args->Param;
             }
             *command ^= CMD_READ_8BIT;
         }
@@ -78,8 +78,8 @@ static bool validateCtrl(uint8_t ctrl);
             }
             else {
                 packet->OpCode = OP_PARAMETER_ERROR;
-                packet->Byte2 = OP_REGISTER_WRITE_16BIT;
-                packet->Byte3 = args->Param;
+                packet->Byte1 = OP_REGISTER_WRITE_16BIT;
+                packet->Byte2 = args->Param;
             }
             *command ^= CMD_WRITE_16BIT;
         }
@@ -98,8 +98,8 @@ static bool validateCtrl(uint8_t ctrl);
             }
             else {
                 packet->OpCode = OP_PARAMETER_ERROR;
-                packet->Byte2 = OP_REGISTER_READ_16BIT;
-                packet->Byte3 = args->Param;
+                packet->Byte1 = OP_REGISTER_READ_16BIT;
+                packet->Byte2 = args->Param;
             }
             *command ^= CMD_READ_16BIT;
         }
@@ -120,8 +120,8 @@ static bool validateCtrl(uint8_t ctrl);
             }
             else {
                 packet->OpCode = OP_PARAMETER_ERROR;
-                packet->Byte2 = OP_START_SINGLE_CONVERSION;
-                packet->Byte3 = args->Param;
+                packet->Byte1 = OP_START_SINGLE_CONVERSION;
+                packet->Byte2 = args->Param;
             }
             *command ^= CMD_START_SINGLE;
         }
@@ -145,16 +145,16 @@ static bool validateCtrl(uint8_t ctrl);
                     }
                 }
                 else {
-                    packet->OpCode = OP_PARAMETER_ERROR;
-                    packet->Byte2 = OP_START_SINGLE_CONVERSION;
-                    packet->Byte3 = args->Param;
+                    packet->OpCode = OP_BUFFER_SIZE_ERROR;
+                    packet->Byte1 = OP_START_CONTINUOUS_CONVERSION;
+                    packet->Byte2 = args->Byte2;
+                    packet->Byte3 = args->Byte3;
                 }
             }
             else {
                 packet->OpCode = OP_PARAMETER_ERROR;
-                packet->Byte2 = OP_START_SINGLE_CONVERSION;
-                packet->Byte3 = args->Byte3;
-                packet->Byte4 = args->Byte4;
+                packet->Byte1 = OP_START_CONTINUOUS_CONVERSION;
+                packet->Byte2 = args->Param;
             }
             *command ^= CMD_START_CONTINUOUS;
         }
