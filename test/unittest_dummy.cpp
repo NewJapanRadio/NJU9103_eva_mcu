@@ -8,3 +8,8 @@ Command command;
 ::Timer packetWatchTimer;
 ::Dispatcher dispatcher;
 ::ADCDataBuffer adcDataBuffer;
+
+void (*fpIsrRx)(void);
+void _attach(void (*fp)(void), ::Serial::IrqType type) {
+    fpIsrRx = fp;
+}
