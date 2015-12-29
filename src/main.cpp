@@ -30,7 +30,7 @@ void loop() {
         if (status != ::Dispatcher::Abort) {
             sendPacket(&packet);
             if (packet.OpCode == OP_START_ADC_DATA_DUMP) {
-                adcDataBuffer.Dump(sendPacket);
+                dumpADCData();
                 command ^= CMD_START_DUMP;
             }
         }
@@ -78,7 +78,7 @@ void isrPacketWatch() {
                     dispatcher.SetAbortRequest();
                 }
                 if ((command & CMD_START_DUMP) != 0) {
-                    adcDataBuffer.SetAbortRequest();
+                    // CMD_RESET during CMD_START_DUMP is handled in dumpADCData();
                 }
             }
             else if ((command & CMD_STOP_SINGLE) != 0) {
@@ -93,7 +93,7 @@ void isrPacketWatch() {
             }
             else if ((command & CMD_STOP_DUMP) != 0) {
                 if ((command & CMD_START_DUMP) != 0) {
-                    adcDataBuffer.SetAbortRequest();
+                    // CMD_STOP_DUMP is handled in dumpADCData();
                 }
             }
         }
@@ -187,5 +187,25 @@ void decodeCommand(Packet *args, Command *cmd) {
     }
     else {
         *cmd |= CMD_UNKNOWN;
+    }
+}
+
+void dumpADCData() {
+    Packet packet;
+    packet.Header = DataHeader;
+    uint16_t *buf = adcDataBuffer.GetBuffer();
+    for (int i = 0; i < adcDataBuffer.GetAllocatedSize(); i = i + 4) {
+        if ((command & ( CMD_STOP_DUMP | CMD_RESET )) != 0) {
+            return;
+        }
+        packet.Byte0 = (uint8_t)(buf[i]   >> 8);
+        packet.Byte1 = (uint8_t)(buf[i]   & 0x00FF);
+        packet.Byte2 = (uint8_t)(buf[i+1] >> 8);
+        packet.Byte3 = (uint8_t)(buf[i+1] & 0x00FF);
+        packet.Byte4 = (uint8_t)(buf[i+2] >> 8);
+        packet.Byte5 = (uint8_t)(buf[i+2] & 0x00FF);
+        packet.Byte6 = (uint8_t)(buf[i+3] >> 8);
+        packet.Byte7 = (uint8_t)(buf[i+3] & 0x00FF);
+        sendPacket(&packet);
     }
 }

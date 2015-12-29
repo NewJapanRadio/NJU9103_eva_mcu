@@ -28,17 +28,14 @@ class ADCDataBuffer {
         bool Alloc(uint16_t size);
 
         /**
-         * @brief dump ADC data buffer
-         *
-         * @param [in] pfSendPacket
-         *      data is send via given function
-         */
-        void Dump(void (*pfSendPacket)(Packet *));
-
-        /**
          * @brief return pointer to data buffer
          */
         uint16_t * GetBuffer();
+
+        /**
+         * @brief return allocated memory size
+         */
+        uint16_t GetAllocatedSize();
 
         /**
          * @brief return actually used length for conversion data
@@ -58,17 +55,10 @@ class ADCDataBuffer {
          */
         void SetDataLength(uint16_t length);
 
-        /**
-         * @brief set abort request to Dump()
-         */
-        void SetAbortRequest();
-
     private:
         uint16_t dataLength;
         uint16_t allocatedSize; // aligned size
         uint16_t adcDataBuffer[MAX_BUFFER_SIZE];
-
-        bool abortRequest;
 };
 
 #endif

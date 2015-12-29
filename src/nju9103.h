@@ -50,4 +50,9 @@ NJRC_STATIC void sendPacket(Packet *packet);
  */
 NJRC_STATIC void decodeCommand(Packet *args, Command *cmd);
 
+/**
+ * @brief dump ADC data buffer
+ */
+NJRC_STATIC void dumpADCData();
+
 #endif
