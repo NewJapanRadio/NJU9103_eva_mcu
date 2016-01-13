@@ -127,7 +127,7 @@ static bool validateCtrl(uint8_t ctrl);
         }
         else if (*command & CMD_START_CONTINUOUS) {
             if (validateCtrl(args->Param)) {
-                uint32_t length = (uint16_t)((args->Byte2 << 8) + args->Byte3);
+                uint16_t length = (uint16_t)((args->Byte2 << 8) + args->Byte3);
 
                 if (adcDataBuffer->Alloc(length + 1)) {
                     uint16_t resultLength = 0;
@@ -137,8 +137,8 @@ static bool validateCtrl(uint8_t ctrl);
                         packet->Header = ResponseHeader;
                         packet->OpCode = OP_START_CONTINUOUS_CONVERSION;
                         packet->Param = args->Param;
-                        packet->Data0 = (uint8_t)(length >> 8);
-                        packet->Data1 = (uint8_t)(length & 0x00FF);
+                        packet->Data0 = args->Byte2;
+                        packet->Data1 = args->Byte3;
                     }
                     else if (spiStatus == ::SPICommand::Abort) {
                         status = Abort;
