@@ -134,6 +134,25 @@ class SPICommand {
         Status StartContinuousConversion(uint8_t control, uint16_t buf[], uint16_t length, uint16_t *resultLength);
 
         /**
+         * @brief execute ADC conversion intermittently
+         * @param [in] control
+         *      value of CTRL register
+         * @param [out] buf[]
+         *      buffer for conversion data
+         * @param [in] length
+         *      number of conversion
+         * @param [out] resultLength
+         *      conversion count actually
+         * @return result status
+         * @retval Success
+         * @retval Abort
+         *      a conversion is aborted with SetAbortRequest()
+         * @retval Error
+         *      this value will not be returned
+         */
+        Status StartIntermittentConversion(uint8_t control, uint16_t buf[], uint32_t interval, uint16_t length, uint16_t *resultLength);
+
+        /**
          * @brief set abort request to StartSingleConversion() or StartContinuousConversion()
          */
         void SetAbortRequest();

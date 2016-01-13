@@ -88,6 +88,9 @@ void isrPacketWatch() {
                 if ((command & CMD_START_CONTINUOUS) != 0) {
                     dispatcher.SetAbortRequest();
                 }
+                if ((command & CMD_START_INTERMITTENT) != 0) {
+                    dispatcher.SetAbortRequest();
+                }
                 if ((command & CMD_START_DUMP) != 0) {
                     // CMD_RESET during CMD_START_DUMP is handled in dumpADCData();
                 }
@@ -99,6 +102,11 @@ void isrPacketWatch() {
             }
             else if ((command & CMD_STOP_CONTINUOUS) != 0) {
                 if ((command & CMD_START_CONTINUOUS) != 0) {
+                    dispatcher.SetAbortRequest();
+                }
+            }
+            else if ((command & CMD_STOP_INTERMITTENT) != 0) {
+                if ((command & CMD_START_INTERMITTENT) != 0) {
                     dispatcher.SetAbortRequest();
                 }
             }
@@ -179,6 +187,9 @@ void decodeCommand(Packet *args, Command *cmd) {
             case OP_START_CONTINUOUS_CONVERSION :
                 *cmd |= CMD_START_CONTINUOUS;
                 break;
+            case OP_START_INTERMITTENT_CONVERSION :
+                *cmd |= CMD_START_INTERMITTENT;
+                break;
             case OP_START_ADC_DATA_DUMP :
                 *cmd |= CMD_START_DUMP;
                 break;
@@ -187,6 +198,9 @@ void decodeCommand(Packet *args, Command *cmd) {
                 break;
             case OP_STOP_CONTINUOUS_CONVERSION :
                 *cmd |= CMD_STOP_CONTINUOUS;
+                break;
+            case OP_STOP_INTERMITTENT_CONVERSION :
+                *cmd |= CMD_STOP_INTERMITTENT;
                 break;
             case OP_STOP_ADC_DATA_DUMP :
                 *cmd |= CMD_STOP_DUMP;

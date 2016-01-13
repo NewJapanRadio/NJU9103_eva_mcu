@@ -119,6 +119,10 @@ static ::SPICommand::Status ReadADCData(::SPICommand *dispatcher, uint16_t *data
     return Success;
 }
 
+::SPICommand::Status ::SPICommand::StartIntermittentConversion(uint8_t control, uint16_t buf[], uint32_t interval, uint16_t length, uint16_t *resultLength) {
+    return Success;
+}
+
 void ::SPICommand::SetAbortRequest() {
     abortRequest = true;
 }

@@ -158,6 +158,44 @@ static bool validateCtrl(uint8_t ctrl);
             }
             *command ^= CMD_START_CONTINUOUS;
         }
+        else if (*command & CMD_START_INTERMITTENT) {
+            if (validateCtrl(args->Param)) {
+                uint16_t length = (uint16_t)((args->Byte2 << 8) + args->Byte3);
+                uint32_t interval = (uint32_t)((args->Byte4 << 24) + (args->Byte5 << 16) + (args->Byte6 << 8) + args->Byte7);
+
+                if (adcDataBuffer->Alloc(length + 1)) {
+                    uint16_t resultLength = 0;
+                    spiStatus = spiCommand->StartIntermittentConversion(args->Param, adcDataBuffer->GetBuffer(), interval, length, &resultLength);
+                    adcDataBuffer->SetDataLength(resultLength);
+                    if (spiStatus == ::SPICommand::Success) {
+                        packet->Header = ResponseHeader;
+                        packet->OpCode = OP_START_INTERMITTENT_CONVERSION;
+                        packet->Param = args->Param;
+                        packet->Data0 = args->Byte2;
+                        packet->Data1 = args->Byte3;
+                        packet->Byte4 = args->Byte4;
+                        packet->Byte5 = args->Byte5;
+                        packet->Byte6 = args->Byte6;
+                        packet->Byte7 = args->Byte7;
+                    }
+                    else if (spiStatus == ::SPICommand::Abort) {
+                        status = Abort;
+                    }
+                }
+                else {
+                    packet->OpCode = OP_BUFFER_SIZE_ERROR;
+                    packet->Byte1 = OP_START_INTERMITTENT_CONVERSION;
+                    packet->Byte2 = args->Byte2;
+                    packet->Byte3 = args->Byte3;
+                }
+            }
+            else {
+                packet->OpCode = OP_PARAMETER_ERROR;
+                packet->Byte1 = OP_START_INTERMITTENT_CONVERSION;
+                packet->Byte2 = args->Param;
+            }
+            *command ^= CMD_START_INTERMITTENT;
+        }
         else if (*command & CMD_START_DUMP) {
             uint16_t length = adcDataBuffer->GetDataLength() - 1;
             packet->Header = ResponseHeader;
