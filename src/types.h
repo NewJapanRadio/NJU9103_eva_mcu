@@ -45,17 +45,19 @@ typedef struct {
 } Packet;
 
 /* Operation Code */
-#define OP_SPI_RESET                   0x00
-#define OP_REGISTER_WRITE_8BIT         0x10
-#define OP_REGISTER_READ_8BIT          0x20
-#define OP_REGISTER_WRITE_16BIT        0x30
-#define OP_REGISTER_READ_16BIT         0x40
-#define OP_START_SINGLE_CONVERSION     0x50
-#define OP_START_CONTINUOUS_CONVERSION 0x60
-#define OP_START_ADC_DATA_DUMP         0x70
-#define OP_STOP_SINGLE_CONVERSION      0x51
-#define OP_STOP_CONTINUOUS_CONVERSION  0x61
-#define OP_STOP_ADC_DATA_DUMP          0x71
+#define OP_SPI_RESET                     0x00
+#define OP_REGISTER_WRITE_8BIT           0x10
+#define OP_REGISTER_READ_8BIT            0x20
+#define OP_REGISTER_WRITE_16BIT          0x30
+#define OP_REGISTER_READ_16BIT           0x40
+#define OP_START_SINGLE_CONVERSION       0x50
+#define OP_START_CONTINUOUS_CONVERSION   0x60
+#define OP_START_INTERMITTENT_CONVERSION 0x70
+#define OP_START_ADC_DATA_DUMP           0x80
+#define OP_STOP_SINGLE_CONVERSION        0x51
+#define OP_STOP_CONTINUOUS_CONVERSION    0x61
+#define OP_STOP_INTERMITTENT_CONVERSION  0x71
+#define OP_STOP_ADC_DATA_DUMP            0x81
 
 #define OP_CHKSUM_ERROR                0xFF
 #define OP_PARAMETER_ERROR             0xFE
@@ -68,17 +70,19 @@ typedef uint8_t ReceiveDataStatus;
 #define RX_STATUS_DATA_RECEIVED 0x02
 
 typedef uint16_t Command;
-#define CMD_RESET            0x1000
-#define CMD_WRITE_8BIT       0x0001
-#define CMD_READ_8BIT        0x0002
-#define CMD_WRITE_16BIT      0x0004
-#define CMD_READ_16BIT       0x0008
-#define CMD_START_SINGLE     0x0010
-#define CMD_START_CONTINUOUS 0x0020
-#define CMD_START_DUMP       0x0040
-#define CMD_STOP_SINGLE      0x0080
-#define CMD_STOP_CONTINUOUS  0x0100
-#define CMD_STOP_DUMP        0x0200
-#define CMD_UNKNOWN          0x8000
+#define CMD_RESET              0x1000
+#define CMD_WRITE_8BIT         0x0001
+#define CMD_READ_8BIT          0x0002
+#define CMD_WRITE_16BIT        0x0004
+#define CMD_READ_16BIT         0x0008
+#define CMD_START_SINGLE       0x0010
+#define CMD_START_CONTINUOUS   0x0020
+#define CMD_START_INTERMITTENT 0x0040
+#define CMD_START_DUMP         0x0080
+#define CMD_STOP_SINGLE        0x0100
+#define CMD_STOP_CONTINUOUS    0x0200
+#define CMD_STOP_INTERMITTENT  0x0400
+#define CMD_STOP_DUMP          0x0800
+#define CMD_UNKNOWN            0x8000
 
 #endif
