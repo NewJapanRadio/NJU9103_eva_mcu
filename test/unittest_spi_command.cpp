@@ -360,7 +360,7 @@ TEST(SPICommand, Abort_StartContinuousConversion) {
     EXPECT_EQ(0x0000, rd[6]);
 }
 
-TEST(SPICommand, Abort_StartIntermittentConversion) {
+TEST(SPICommand, Abort_StartIntermittentConversion_1) {
     SPICommand spiCommand;
     uint16_t rd[7] = { 0 };
     uint16_t len;
@@ -431,4 +431,141 @@ TEST(SPICommand, Abort_StartIntermittentConversion) {
     EXPECT_EQ(0x0000, rd[4]);
     EXPECT_EQ(0x0000, rd[5]);
     EXPECT_EQ(0x0000, rd[6]);
+}
+
+TEST(SPICommand, Abort_StartIntermittentConversion_2) {
+    SPICommand spiCommand;
+    uint16_t rd[7];
+    uint16_t len;
+
+    uint8_t chsel_mode =  0x23;
+
+    // emulate rdyb wait
+    EXPECT_CALL(*spiCommand.rdyb, read())
+        .Times(AtLeast(3 * (0x5+1)))
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 1
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 2
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 3
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 4
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 5
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 6
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0));// 7
+
+    EXPECT_CALL(*spiCommand.sleep, sleep(_))
+        .Times(AnyNumber());
+    EXPECT_CALL(*spiCommand.sleep, sleepMillisecond(_))
+        .Times(AnyNumber());
+    EXPECT_CALL(*spiCommand.sleep, sleepMicrosecond(_))
+        .Times(AnyNumber());
+    EXPECT_CALL(*spiCommand.stopwatch, start())
+        .Times(AnyNumber());
+    EXPECT_CALL(*spiCommand.stopwatch, stop())
+        .Times(AnyNumber());
+    EXPECT_CALL(*spiCommand.stopwatch, read())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(100));
+    EXPECT_CALL(*spiCommand.stopwatch, readMillisecond())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(100));
+    EXPECT_CALL(*spiCommand.stopwatch, readMicrosecond())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(100));
+
+    {
+        InSequence s;
+
+        // data pattern is same as test of StartIntermittentConversion
+        for (int i = 0x01; i <= 0xEF; i = i + 0x44) {
+            EXPECT_CALL(*spiCommand.spi, write(0x00));
+            EXPECT_CALL(*spiCommand.spi, write(chsel_mode));
+            EXPECT_CALL(*spiCommand.spi, write(0x1C));
+            EXPECT_CALL(*spiCommand.spi, write(_))
+                .Times(Exactly(2))
+                .WillOnce(Return(i))
+                .WillOnce(Return(i+0x22));
+        }
+
+        EXPECT_CALL(*spiCommand.spi, write(0x00));
+        EXPECT_CALL(*spiCommand.spi, write(chsel_mode));
+        EXPECT_CALL(*spiCommand.spi, write(0x1C));
+        EXPECT_CALL(*spiCommand.spi, write(_))
+            .Times(Exactly(2))
+            .WillOnce(Return(0xED))
+            .WillOnce(Return(0xCB));
+
+        EXPECT_CALL(*spiCommand.spi, write(0x00));
+        EXPECT_CALL(*spiCommand.spi, write(chsel_mode));
+        EXPECT_CALL(*spiCommand.spi, write(0x1C));
+        EXPECT_CALL(*spiCommand.spi, write(_))
+            .Times(Exactly(2))
+            .WillOnce(Return(0xA9))
+            .WillOnce(DoAll(InvokeWithoutArgs(&spiCommand, &SPICommand::SetAbortRequest), Return(0x87)));
+    }
+
+    EXPECT_EQ(SPICommand::Abort, spiCommand.StartIntermittentConversion(chsel_mode, rd, 1050, 0x6, &len));
+    EXPECT_EQ(5, len);
+    EXPECT_EQ(0x0123, rd[0]);
+    EXPECT_EQ(0x4567, rd[1]);
+    EXPECT_EQ(0x89AB, rd[2]);
+    EXPECT_EQ(0xCDEF, rd[3]);
+    EXPECT_EQ(0xEDCB, rd[4]);
+    EXPECT_EQ(0xA987, rd[5]);
+    EXPECT_EQ(0x0000, rd[6]);
+}
+
+// fail test for interval < conversion time
+TEST(SPICommand, Fail_StartIntermittentConversion) {
+    SPICommand spiCommand;
+    uint16_t rd[7];
+    uint16_t len;
+
+    uint8_t chsel_mode =  0x23;
+
+    // emulate rdyb wait
+    EXPECT_CALL(*spiCommand.rdyb, read())
+        .Times(AtLeast(3 * (0x0+1)))
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 1
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 2
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 3
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 4
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 5
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 6
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0));// 7
+
+    EXPECT_CALL(*spiCommand.sleep, sleep(_))
+        .Times(AnyNumber());
+    EXPECT_CALL(*spiCommand.sleep, sleepMillisecond(_))
+        .Times(AnyNumber());
+    EXPECT_CALL(*spiCommand.sleep, sleepMicrosecond(_))
+        .Times(AnyNumber());
+    EXPECT_CALL(*spiCommand.stopwatch, start())
+        .Times(AnyNumber());
+    EXPECT_CALL(*spiCommand.stopwatch, stop())
+        .Times(AnyNumber());
+    EXPECT_CALL(*spiCommand.stopwatch, read())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(100));
+    EXPECT_CALL(*spiCommand.stopwatch, readMillisecond())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(100));
+    EXPECT_CALL(*spiCommand.stopwatch, readMicrosecond())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(100));
+
+    {
+        InSequence s;
+
+        EXPECT_CALL(*spiCommand.spi, write(0x00));
+        EXPECT_CALL(*spiCommand.spi, write(chsel_mode));
+        EXPECT_CALL(*spiCommand.spi, write(0x1C));
+        EXPECT_CALL(*spiCommand.spi, write(_))
+            .Times(Exactly(2))
+            .WillOnce(Return(0x01))
+            .WillOnce(Return(0x23));
+    }
+
+    EXPECT_EQ(SPICommand::Fail, spiCommand.StartIntermittentConversion(chsel_mode, rd, 50, 0x6, &len));
+
+    EXPECT_EQ(1, len);
+    EXPECT_EQ(0x0123, rd[0]);
 }

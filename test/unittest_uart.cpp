@@ -64,7 +64,7 @@ TEST(UART, SPIReset) {
 
     setup();
 
-    for (int i = 0; i < PACKET_SIZE+1; i ++) {
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
         fpIsrRx();
     }
 
@@ -117,7 +117,7 @@ TEST(UART, RegisterWrite8Bit) {
 
     setup();
 
-    for (int i = 0; i < PACKET_SIZE+1; i ++) {
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
         fpIsrRx();
     }
 
@@ -171,7 +171,7 @@ TEST(UART, RegisterRead8Bit) {
 
     setup();
 
-    for (int i = 0; i < PACKET_SIZE+1; i ++) {
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
         fpIsrRx();
     }
 
@@ -225,7 +225,7 @@ TEST(UART, RegisterWrite16Bit) {
 
     setup();
 
-    for (int i = 0; i < PACKET_SIZE+1; i ++) {
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
         fpIsrRx();
     }
 
@@ -281,7 +281,7 @@ TEST(UART, RegisterRead16Bit) {
 
     setup();
 
-    for (int i = 0; i < PACKET_SIZE+1; i ++) {
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
         fpIsrRx();
     }
 
@@ -345,7 +345,7 @@ TEST(UART, StartSingleConversion) {
 
     setup();
 
-    for (int i = 0; i < PACKET_SIZE+1; i ++) {
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
         fpIsrRx();
     }
 
@@ -436,7 +436,7 @@ TEST(UART, StartContinuousConversion) {
 
     setup();
 
-    for (int i = 0; i < PACKET_SIZE+1; i ++) {
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
         fpIsrRx();
     }
 
@@ -444,6 +444,118 @@ TEST(UART, StartContinuousConversion) {
     isrPacketWatch();
     EXPECT_EQ(0x0, receiveDataStatus);
     EXPECT_EQ(0x0020, command);
+
+    loop();
+
+    EXPECT_EQ(8, adcDataBuffer.allocatedSize);
+    EXPECT_EQ(0x1234, adcDataBuffer.adcDataBuffer[0]);
+    EXPECT_EQ(0x5678, adcDataBuffer.adcDataBuffer[1]);
+    EXPECT_EQ(0x9ABC, adcDataBuffer.adcDataBuffer[2]);
+    EXPECT_EQ(0xDEF1, adcDataBuffer.adcDataBuffer[3]);
+    EXPECT_EQ(0x2345, adcDataBuffer.adcDataBuffer[4]);
+    EXPECT_EQ(0x0000, adcDataBuffer.adcDataBuffer[5]);
+}
+
+TEST(UART, StartIntermittentConversion) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
+    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+        .WillRepeatedly(Invoke(_attach));
+
+    EXPECT_CALL(*(dispatcher.spiCommand)->sleep, sleep(_))
+        .Times(AnyNumber());
+    EXPECT_CALL(*(dispatcher.spiCommand)->sleep, sleepMillisecond(_))
+        .Times(AnyNumber());
+    EXPECT_CALL(*(dispatcher.spiCommand)->sleep, sleepMicrosecond(_))
+        .Times(AnyNumber());
+    EXPECT_CALL(*(dispatcher.spiCommand)->stopwatch, start())
+        .Times(AnyNumber());
+    EXPECT_CALL(*(dispatcher.spiCommand)->stopwatch, stop())
+        .Times(AnyNumber());
+    EXPECT_CALL(*(dispatcher.spiCommand)->stopwatch, read())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(100));
+    EXPECT_CALL(*(dispatcher.spiCommand)->stopwatch, readMillisecond())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(100));
+    EXPECT_CALL(*(dispatcher.spiCommand)->stopwatch, readMicrosecond())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(100));
+
+    {
+        InSequence s;
+        for (int i = 0; i < PACKET_SIZE+1; i++) {
+            EXPECT_CALL(uart, readable())
+                .Times(Exactly(2))
+                .WillOnce(Return(1))
+                .WillOnce(Return(0));
+        }
+    }
+
+    EXPECT_CALL(*(dispatcher.spiCommand)->rdyb, read())
+        .Times(Exactly(15))
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0))
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0))
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0))
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0))
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0));
+
+    {
+        InSequence s;
+
+        // data pattern is same as test of StartIntermittentConversion
+        for (int i = 0x12; i <= 0xBC; i = i + 0x44) {
+            EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x00));
+            EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x02));
+            EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x1C));
+            EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(_))
+                .Times(Exactly(2))
+                .WillOnce(Return(i))
+                .WillOnce(Return(i+0x22));
+        }
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x00));
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x02));
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x1C));
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(_))
+            .Times(Exactly(2))
+            .WillOnce(Return(0xDE))
+            .WillOnce(Return(0xF1));
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x00));
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x02));
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x1C));
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(_))
+            .Times(Exactly(2))
+            .WillOnce(Return(0x23))
+            .WillOnce(Return(0x45));
+    }
+
+    uint8_t cmd[] = { 0x10, 0x70, 0x02, 0x00, 0x04, 0x00, 0x0F, 0x42, 0x40, 0xE8 };
+    {
+        InSequence s;
+        for (int i = 0; i < PACKET_SIZE+1; i++) {
+            EXPECT_CALL(uart, read())
+                .WillOnce(Return(cmd[i]));
+        }
+    }
+
+    uint8_t res[] = { 0x20, 0x70, 0x02, 0x00, 0x04, 0x00, 0x0F, 0x42, 0x40, 0xD8 };
+    {
+        InSequence s;
+        for (int i = 0; i < PACKET_SIZE+1; i++) {
+            EXPECT_CALL(uart, write(res[i]))
+                .Times(Exactly(1));
+        }
+    }
+
+    setup();
+
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
+        fpIsrRx();
+    }
+
+    EXPECT_EQ(0x2, receiveDataStatus);
+    isrPacketWatch();
+    EXPECT_EQ(0x0, receiveDataStatus);
+    EXPECT_EQ(0x0040, command);
 
     loop();
 
@@ -505,7 +617,7 @@ TEST(UART, StartADCDataDump) {
 
     setup();
 
-    for (int i = 0; i < PACKET_SIZE+1; i ++) {
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
         fpIsrRx();
     }
 
@@ -518,7 +630,7 @@ TEST(UART, StartADCDataDump) {
 }
 
 void StopSingleConversion() {
-    for (int i = 0; i < PACKET_SIZE+1; i ++) {
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
         fpIsrRx();
     }
     isrPacketWatch();
@@ -574,7 +686,7 @@ TEST(UART, StopSingleConversion) {
 
     setup();
 
-    for (int i = 0; i < PACKET_SIZE+1; i ++) {
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
         fpIsrRx();
     }
 
@@ -642,7 +754,7 @@ TEST(UART, StopSingleConversion_By_SPIReset) {
 
     setup();
 
-    for (int i = 0; i < PACKET_SIZE+1; i ++) {
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
         fpIsrRx();
     }
 
@@ -658,7 +770,7 @@ TEST(UART, StopSingleConversion_By_SPIReset) {
 }
 
 void StopContinuousConversion() {
-    for (int i = 0; i < PACKET_SIZE+1; i ++) {
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
         fpIsrRx();
     }
     isrPacketWatch();
@@ -748,7 +860,7 @@ TEST(UART, StopContinuousConversion) {
 
     setup();
 
-    for (int i = 0; i < PACKET_SIZE+1; i ++) {
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
         fpIsrRx();
     }
 
@@ -857,7 +969,7 @@ TEST(UART, StopContinuousConversion_By_SPIReset) {
 
     setup();
 
-    for (int i = 0; i < PACKET_SIZE+1; i ++) {
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
         fpIsrRx();
     }
 
@@ -878,8 +990,254 @@ TEST(UART, StopContinuousConversion_By_SPIReset) {
     EXPECT_EQ(0x0000, adcDataBuffer.adcDataBuffer[5]);
 }
 
+void StopIntermittentConversion() {
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
+        fpIsrRx();
+    }
+    isrPacketWatch();
+}
+TEST(UART, StopIntermittentConversion) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
+    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+        .WillRepeatedly(Invoke(_attach));
+
+    EXPECT_CALL(*(dispatcher.spiCommand)->sleep, sleep(_))
+        .Times(AnyNumber());
+    EXPECT_CALL(*(dispatcher.spiCommand)->sleep, sleepMillisecond(_))
+        .Times(AnyNumber());
+    EXPECT_CALL(*(dispatcher.spiCommand)->sleep, sleepMicrosecond(_))
+        .Times(AnyNumber());
+    EXPECT_CALL(*(dispatcher.spiCommand)->stopwatch, start())
+        .Times(AnyNumber());
+    EXPECT_CALL(*(dispatcher.spiCommand)->stopwatch, stop())
+        .Times(AnyNumber());
+    EXPECT_CALL(*(dispatcher.spiCommand)->stopwatch, read())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(100));
+    EXPECT_CALL(*(dispatcher.spiCommand)->stopwatch, readMillisecond())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(100));
+    EXPECT_CALL(*(dispatcher.spiCommand)->stopwatch, readMicrosecond())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(100));
+
+    {
+        InSequence s;
+        for (int i = 0; i < (PACKET_SIZE+1)*2; i++) {
+            EXPECT_CALL(uart, readable())
+                .Times(Exactly(2))
+                .WillOnce(Return(1))
+                .WillOnce(Return(0));
+        }
+    }
+
+    EXPECT_CALL(*(dispatcher.spiCommand)->rdyb, read())
+        .Times(Exactly(15))
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0))
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0))
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0))
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0))
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(DoAll(InvokeWithoutArgs(StopIntermittentConversion), Return(1)));
+
+    {
+        InSequence s;
+
+        // data pattern is same as test of StartIntermittentConversion
+        for (int i = 0x12; i <= 0xBC; i = i + 0x44) {
+            EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x00));
+            EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x02));
+            EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x1C));
+            EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(_))
+                .Times(Exactly(2))
+                .WillOnce(Return(i))
+                .WillOnce(Return(i+0x22));
+        }
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x00));
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x02));
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x1C));
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(_))
+            .Times(Exactly(2))
+            .WillOnce(Return(0xDE))
+            .WillOnce(Return(0xF1));
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x00));
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x02));
+        // EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x1C));
+        // EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(_))
+        //     .Times(Exactly(2))
+        //     .WillOnce(Return(0x23))
+        //     .WillOnce(Return(0x45));
+    }
+
+    uint8_t cmd1[] = { 0x10, 0x70, 0x02, 0x00, 0x04, 0x00, 0x0F, 0x42, 0x40, 0xE8 };
+    uint8_t cmd2[] = { 0x10, 0x71, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7E };
+    {
+        InSequence s;
+        for (int i = 0; i < PACKET_SIZE+1; i++) {
+            EXPECT_CALL(uart, read())
+                .WillOnce(Return(cmd1[i]));
+        }
+        for (int i = 0; i < PACKET_SIZE+1; i++) {
+            EXPECT_CALL(uart, read())
+                .WillOnce(Return(cmd2[i]));
+        }
+    }
+
+    uint8_t res[] = { 0x20, 0x71, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x6E };
+    {
+        InSequence s;
+        for (int i = 0; i < PACKET_SIZE+1; i++) {
+            EXPECT_CALL(uart, write(res[i]))
+                .Times(Exactly(1));
+        }
+    }
+
+    setup();
+
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
+        fpIsrRx();
+    }
+
+    EXPECT_EQ(0x2, receiveDataStatus);
+    isrPacketWatch();
+    EXPECT_EQ(0x0, receiveDataStatus);
+    EXPECT_EQ(0x0040, command);
+
+    loop();
+    loop();
+
+    EXPECT_EQ(8, adcDataBuffer.allocatedSize);
+    EXPECT_EQ(0x1234, adcDataBuffer.adcDataBuffer[0]);
+    EXPECT_EQ(0x5678, adcDataBuffer.adcDataBuffer[1]);
+    EXPECT_EQ(0x9ABC, adcDataBuffer.adcDataBuffer[2]);
+    EXPECT_EQ(0xDEF1, adcDataBuffer.adcDataBuffer[3]);
+    EXPECT_EQ(0x0000, adcDataBuffer.adcDataBuffer[4]);
+    EXPECT_EQ(0x0000, adcDataBuffer.adcDataBuffer[5]);
+}
+TEST(UART, StopIntermittentConversion_By_SPIReset) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
+    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+        .WillRepeatedly(Invoke(_attach));
+
+    EXPECT_CALL(*(dispatcher.spiCommand)->sleep, sleep(_))
+        .Times(AnyNumber());
+    EXPECT_CALL(*(dispatcher.spiCommand)->sleep, sleepMillisecond(_))
+        .Times(AnyNumber());
+    EXPECT_CALL(*(dispatcher.spiCommand)->sleep, sleepMicrosecond(_))
+        .Times(AnyNumber());
+    EXPECT_CALL(*(dispatcher.spiCommand)->stopwatch, start())
+        .Times(AnyNumber());
+    EXPECT_CALL(*(dispatcher.spiCommand)->stopwatch, stop())
+        .Times(AnyNumber());
+    EXPECT_CALL(*(dispatcher.spiCommand)->stopwatch, read())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(100));
+    EXPECT_CALL(*(dispatcher.spiCommand)->stopwatch, readMillisecond())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(100));
+    EXPECT_CALL(*(dispatcher.spiCommand)->stopwatch, readMicrosecond())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(100));
+
+    {
+        InSequence s;
+        for (int i = 0; i < (PACKET_SIZE+1)*2; i++) {
+            EXPECT_CALL(uart, readable())
+                .Times(Exactly(2))
+                .WillOnce(Return(1))
+                .WillOnce(Return(0));
+        }
+    }
+
+    EXPECT_CALL(*(dispatcher.spiCommand)->rdyb, read())
+        .Times(Exactly(15))
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0))
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0))
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0))
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0))
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(DoAll(InvokeWithoutArgs(StopIntermittentConversion), Return(1)));
+
+    {
+        InSequence s;
+
+        // data pattern is same as test of StartIntermittentConversion
+        for (int i = 0x12; i <= 0xBC; i = i + 0x44) {
+            EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x00));
+            EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x02));
+            EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x1C));
+            EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(_))
+                .Times(Exactly(2))
+                .WillOnce(Return(i))
+                .WillOnce(Return(i+0x22));
+        }
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x00));
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x02));
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x1C));
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(_))
+            .Times(Exactly(2))
+            .WillOnce(Return(0xDE))
+            .WillOnce(Return(0xF1));
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x00));
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x02));
+        // EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x1C));
+        // EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(_))
+        //     .Times(Exactly(2))
+        //     .WillOnce(Return(0x23))
+        //     .WillOnce(Return(0x45));
+        //
+
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x7F)); // SPIResetCommand 0
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0xFF)); // SPIResetCommand 1
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0xFF)); // SPIResetCommand 2
+    }
+
+    uint8_t cmd1[] = { 0x10, 0x70, 0x02, 0x00, 0x04, 0x00, 0x0F, 0x42, 0x40, 0xE8 };
+    uint8_t cmd2[] = { 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xEF };
+    {
+        InSequence s;
+        for (int i = 0; i < PACKET_SIZE+1; i++) {
+            EXPECT_CALL(uart, read())
+                .WillOnce(Return(cmd1[i]));
+        }
+        for (int i = 0; i < PACKET_SIZE+1; i++) {
+            EXPECT_CALL(uart, read())
+                .WillOnce(Return(cmd2[i]));
+        }
+    }
+
+    uint8_t res[] = { 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xDF };
+    {
+        InSequence s;
+        for (int i = 0; i < PACKET_SIZE+1; i++) {
+            EXPECT_CALL(uart, write(res[i]))
+                .Times(Exactly(1));
+        }
+    }
+
+    setup();
+
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
+        fpIsrRx();
+    }
+
+    EXPECT_EQ(0x2, receiveDataStatus);
+    isrPacketWatch();
+    EXPECT_EQ(0x0, receiveDataStatus);
+    EXPECT_EQ(0x0040, command);
+
+    loop();
+    loop();
+
+    EXPECT_EQ(8, adcDataBuffer.allocatedSize);
+    EXPECT_EQ(0x1234, adcDataBuffer.adcDataBuffer[0]);
+    EXPECT_EQ(0x5678, adcDataBuffer.adcDataBuffer[1]);
+    EXPECT_EQ(0x9ABC, adcDataBuffer.adcDataBuffer[2]);
+    EXPECT_EQ(0xDEF1, adcDataBuffer.adcDataBuffer[3]);
+    EXPECT_EQ(0x0000, adcDataBuffer.adcDataBuffer[4]);
+    EXPECT_EQ(0x0000, adcDataBuffer.adcDataBuffer[5]);
+}
+
 void StopADCDataDump() {
-    for (int i = 0; i < PACKET_SIZE+1; i ++) {
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
         fpIsrRx();
     }
     isrPacketWatch();
@@ -956,7 +1314,7 @@ TEST(UART, StopADCDataDump) {
 
     setup();
 
-    for (int i = 0; i < PACKET_SIZE+1; i ++) {
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
         fpIsrRx();
     }
 
@@ -1048,7 +1406,7 @@ TEST(UART, StopADCDataDump_By_SPIReset) {
 
     setup();
 
-    for (int i = 0; i < PACKET_SIZE+1; i ++) {
+    for (int i = 0; i < PACKET_SIZE+1; i++) {
         fpIsrRx();
     }
 
