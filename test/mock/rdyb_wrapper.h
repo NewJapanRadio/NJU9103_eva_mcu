@@ -7,6 +7,7 @@
 class Rdyb {
     public:
         Rdyb() { }
+
         MOCK_METHOD0(read,
                 int());
 };

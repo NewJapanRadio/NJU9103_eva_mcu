@@ -1,7 +1,8 @@
 #ifndef __TIMER_WRAPPER_H__
 #define __TIMER_WRAPPER_H__
 
-#include <stdint.h>
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 class Timer {
     public:

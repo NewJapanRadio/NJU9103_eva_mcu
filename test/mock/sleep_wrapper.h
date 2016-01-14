@@ -1,7 +1,8 @@
 #ifndef __SLEEP_WRAPPER_H__
 #define __SLEEP_WRAPPER_H__
 
-#include <stdint.h>
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 class Sleep {
     public:
