@@ -17,6 +17,8 @@
 ::SPICommand::~SPICommand() {
     delete rdyb;
     delete spi;
+    delete sleep;
+    delete stopwatch;
 }
 
 ::SPICommand::Status ::SPICommand::SPIReset() {
