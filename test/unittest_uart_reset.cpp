@@ -22,8 +22,8 @@ extern ::ADCDataBuffer adcDataBuffer;
 extern void (*fpIsrRx)(void);
 extern void _attach(void (*fp)(void), ::Serial::IrqType type);
 
-
 TEST(UARTReset, Case1) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -67,6 +67,7 @@ TEST(UARTReset, Case1) {
 }
 
 TEST(UARTReset, Case2) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -112,6 +113,7 @@ TEST(UARTReset, Case2) {
 }
 
 TEST(UARTReset, Case3) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 

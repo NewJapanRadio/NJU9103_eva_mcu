@@ -23,6 +23,7 @@ extern void (*fpIsrRx)(void);
 extern void _attach(void (*fp)(void), ::Serial::IrqType type);
 
 TEST(ExpectedError, CheckSumError) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -69,6 +70,7 @@ TEST(ExpectedError, CheckSumError) {
 }
 
 TEST(ExpectedError, UnknownCommand) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -115,6 +117,7 @@ TEST(ExpectedError, UnknownCommand) {
 }
 
 TEST(ExpectedError, RegisterWrite8Bit_InvalidAddress) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -161,6 +164,7 @@ TEST(ExpectedError, RegisterWrite8Bit_InvalidAddress) {
 }
 
 TEST(ExpectedError, RegisterRead8Bit_InvalidAddress) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -207,6 +211,7 @@ TEST(ExpectedError, RegisterRead8Bit_InvalidAddress) {
 }
 
 TEST(ExpectedError, RegisterWrite16Bit_InvalidAddress) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -253,6 +258,7 @@ TEST(ExpectedError, RegisterWrite16Bit_InvalidAddress) {
 }
 
 TEST(ExpectedError, RegisterRead16Bit_InvalidAddress) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -299,6 +305,7 @@ TEST(ExpectedError, RegisterRead16Bit_InvalidAddress) {
 }
 
 TEST(ExpectedError, StartSingleConversion_InvalidCtrl) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -345,6 +352,7 @@ TEST(ExpectedError, StartSingleConversion_InvalidCtrl) {
 }
 
 TEST(ExpectedError, StartContinuousConversion_InvalidCtrl) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -391,6 +399,7 @@ TEST(ExpectedError, StartContinuousConversion_InvalidCtrl) {
 }
 
 TEST(ExpectedError, StartContinuousConversion_BufferAllocError) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 

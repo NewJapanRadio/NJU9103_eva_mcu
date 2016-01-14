@@ -23,6 +23,7 @@ extern void (*fpIsrRx)(void);
 extern void _attach(void (*fp)(void), ::Serial::IrqType type);
 
 TEST(UART, SPIReset) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -76,6 +77,7 @@ TEST(UART, SPIReset) {
 }
 
 TEST(UART, RegisterWrite8Bit) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -128,6 +130,7 @@ TEST(UART, RegisterWrite8Bit) {
 }
 
 TEST(UART, RegisterRead8Bit) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -181,6 +184,7 @@ TEST(UART, RegisterRead8Bit) {
 }
 
 TEST(UART, RegisterWrite16Bit) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -234,6 +238,7 @@ TEST(UART, RegisterWrite16Bit) {
 }
 
 TEST(UART, RegisterRead16Bit) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -289,6 +294,7 @@ TEST(UART, RegisterRead16Bit) {
 }
 
 TEST(UART, StartSingleConversion) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -352,6 +358,7 @@ TEST(UART, StartSingleConversion) {
 }
 
 TEST(UART, StartContinuousConversion) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -450,6 +457,7 @@ TEST(UART, StartContinuousConversion) {
 }
 
 TEST(UART, StartADCDataDump) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -516,6 +524,7 @@ void StopSingleConversion() {
     isrPacketWatch();
 }
 TEST(UART, StopSingleConversion) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -580,6 +589,7 @@ TEST(UART, StopSingleConversion) {
     loop();
 }
 TEST(UART, StopSingleConversion_By_SPIReset) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -654,6 +664,7 @@ void StopContinuousConversion() {
     isrPacketWatch();
 }
 TEST(UART, StopContinuousConversion) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -758,6 +769,7 @@ TEST(UART, StopContinuousConversion) {
     EXPECT_EQ(0x0000, adcDataBuffer.adcDataBuffer[5]);
 }
 TEST(UART, StopContinuousConversion_By_SPIReset) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -873,6 +885,7 @@ void StopADCDataDump() {
     isrPacketWatch();
 }
 TEST(UART, StopADCDataDump) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
@@ -957,6 +970,7 @@ TEST(UART, StopADCDataDump) {
     loop();
 }
 TEST(UART, StopADCDataDump_By_SPIReset) {
+    EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
     EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
