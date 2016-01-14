@@ -29,12 +29,12 @@ class Stopwatch {
         /**
          * @brief read elapsed time as millisecond
          */
-        uint32_t read_ms();
+        uint32_t readMillisecond();
 
         /**
          * @brief read elapsed time as microsecond
          */
-        uint32_t read_us();
+        uint32_t readMicrosecond();
 
     private:
         mbed::Timer *timer;

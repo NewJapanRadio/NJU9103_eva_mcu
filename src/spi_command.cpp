@@ -140,7 +140,7 @@ static ::SPICommand::Status ReadADCData(::SPICommand *dispatcher, uint16_t *data
         }
 
         stopwatch->stop();
-        convtime = stopwatch->read_us();
+        convtime = stopwatch->readMicrosecond();
         *resultLength = i + 1;
 
         if (convtime < interval) {
