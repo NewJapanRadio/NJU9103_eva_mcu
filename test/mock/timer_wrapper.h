@@ -6,11 +6,13 @@
 
 class Timer {
     public:
-        Timer();
-        ~Timer();
+        Timer() { }
 
-        void attach(void (*fptr)(void), uint64_t t_us);
-        void detach();
+        MOCK_METHOD2(attach,
+            void(void (*fptr)(void), uint64_t t_us));
+
+        MOCK_METHOD0(detach,
+            void());
 };
 
 #endif

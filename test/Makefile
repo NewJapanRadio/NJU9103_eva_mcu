@@ -10,7 +10,7 @@ TESTOBJ = unittest_dummy.o \
 		  unittest_uart_reset.o
 
 DUT     = main.o dispatcher.o spi_command.o adc_data_buffer.o
-MOCK    = timer_wrapper.o
+MOCK    =
 OBJ     = gtest_main.o gtest-all.o gmock-all.o
 
 CC = gcc
