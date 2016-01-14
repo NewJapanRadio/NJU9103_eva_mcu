@@ -1,3 +1,6 @@
 syntax: glob
 
 .pioenvs
+doc/html
+doc/latex
+test/build
