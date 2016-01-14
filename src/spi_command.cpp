@@ -1,5 +1,4 @@
 #include "spi_command.h"
-#include "rdyb_wrapper.h"
 
 ::SPICommand::SPICommand() {
     rdyb = new ::Rdyb();
@@ -7,6 +6,10 @@
     spi = new ::SPI();
     spi->mode(::SPI::Mode1);
     spi->frequency(1E6);
+
+    sleep = new ::Sleep();
+
+    stopwatch = new ::Stopwatch();
 
     abortRequest = false;
 }
@@ -120,7 +123,35 @@ static ::SPICommand::Status ReadADCData(::SPICommand *dispatcher, uint16_t *data
 }
 
 ::SPICommand::Status ::SPICommand::StartIntermittentConversion(uint8_t control, uint16_t buf[], uint32_t interval, uint16_t length, uint16_t *resultLength) {
-    return Success;
+    Status status = Success;
+    uint32_t convtime = 0;
+    for (int i = 0; i <= length; i++) {
+        stopwatch->start();
+        status = this->StartSingleConversion(control, &buf[i]);
+        if (status != Success) {
+            stopwatch->stop();
+            break;
+        }
+        else if (abortRequest) {
+            abortRequest = false;
+            status = Abort;
+            stopwatch->stop();
+            break;
+        }
+
+        stopwatch->stop();
+        convtime = stopwatch->read_us();
+        *resultLength = i + 1;
+
+        if (convtime < interval) {
+            sleep->sleepMicrosecond(interval - convtime);
+        }
+        else {
+            status = Fail;
+            break;
+        }
+    }
+    return status;
 }
 
 void ::SPICommand::SetAbortRequest() {

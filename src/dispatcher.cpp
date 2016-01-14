@@ -213,6 +213,11 @@ static bool validateCtrl(uint8_t ctrl);
             packet->OpCode = OP_STOP_CONTINUOUS_CONVERSION;
             *command ^= CMD_STOP_CONTINUOUS;
         }
+        else if (*command & CMD_STOP_INTERMITTENT) {
+            packet->Header = ResponseHeader;
+            packet->OpCode = OP_STOP_INTERMITTENT_CONVERSION;
+            *command ^= CMD_STOP_INTERMITTENT;
+        }
         else if (*command & CMD_STOP_DUMP) {
             packet->Header = ResponseHeader;
             packet->OpCode = OP_STOP_ADC_DATA_DUMP;

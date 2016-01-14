@@ -3,6 +3,8 @@
 
 #include "spi_wrapper.h"
 #include "rdyb_wrapper.h"
+#include "sleep_wrapper.h"
+#include "stopwatch_wrapper.h"
 
 #define ADDR_CTRL      0x0
 #define ADDR_ADCDATA0  0x1
@@ -160,8 +162,11 @@ class SPICommand {
     private:
         ::SPI *spi;
         ::Rdyb *rdyb;
+        ::Sleep *sleep;
+        ::Stopwatch *stopwatch;
 
         bool abortRequest;
+        uint16_t *dataBuffer;
 };
 
 #endif
