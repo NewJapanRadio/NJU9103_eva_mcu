@@ -17,10 +17,10 @@ class Stopwatch {
         MOCK_METHOD0(read,
             uint32_t());
 
-        MOCK_METHOD0(read_ms,
+        MOCK_METHOD0(readMillisecond,
             uint32_t());
 
-        MOCK_METHOD0(read_us,
+        MOCK_METHOD0(readMicrosecond,
             uint32_t());
 };
 
