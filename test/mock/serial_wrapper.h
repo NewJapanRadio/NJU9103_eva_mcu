@@ -4,35 +4,37 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-class Serial {
-    public:
-        enum IrqType {
-            RxIrq = 0,
-            TxIrq
-        };
+namespace NewJapanRadio {
+    class Serial {
+        public:
+            enum IrqType {
+                RxIrq = 0,
+                TxIrq
+            };
 
-        Serial() { }
+            Serial() { }
 
-        MOCK_METHOD0(read,
-            uint8_t());
+            MOCK_METHOD0(read,
+                uint8_t());
 
-        MOCK_METHOD0(readable,
-            int8_t());
+            MOCK_METHOD0(readable,
+                int8_t());
 
-        MOCK_METHOD0(writeable,
-            int8_t());
+            MOCK_METHOD0(writeable,
+                int8_t());
 
-        MOCK_METHOD1(write,
-            void(const uint8_t data));
+            MOCK_METHOD1(write,
+                void(const uint8_t data));
 
-        MOCK_METHOD1(print,
-            void(const char* str));
+            MOCK_METHOD1(print,
+                void(const char* str));
 
-        MOCK_METHOD1(println,
-            void(const char* str));
+            MOCK_METHOD1(println,
+                void(const char* str));
 
-        MOCK_METHOD2(attach,
-            void(void (*fptr)(void), IrqType type));
-};
+            MOCK_METHOD2(attach,
+                void(void (*fptr)(void), IrqType type));
+    };
+}
 
 #endif

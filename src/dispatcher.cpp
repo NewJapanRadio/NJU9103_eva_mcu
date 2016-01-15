@@ -6,24 +6,24 @@
 static bool checkAddressRange(uint8_t address);
 static bool validateCtrl(uint8_t ctrl);
 
-::Dispatcher::Dispatcher() {
-    spiCommand = new ::SPICommand();
+NewJapanRadio::Dispatcher::Dispatcher() {
+    spiCommand = new NewJapanRadio::SPICommand();
 }
 
-::Dispatcher::~Dispatcher() {
+NewJapanRadio::Dispatcher::~Dispatcher() {
     delete spiCommand;
 }
 
-::Dispatcher::Status ::Dispatcher::Dispatch(Command *command, Packet *args, Packet *packet, ::ADCDataBuffer *adcDataBuffer) {
+NewJapanRadio::Dispatcher::Status NewJapanRadio::Dispatcher::Dispatch(Command *command, Packet *args, Packet *packet, NewJapanRadio::ADCDataBuffer *adcDataBuffer) {
     memset(packet, 0, sizeof(Packet));
     packet->Header = ErrorHeader;
     packet->OpCode = OP_UNKNOWN_ERROR;
     Status status = Error;
-    ::SPICommand::Status spiStatus;
+    NewJapanRadio::SPICommand::Status spiStatus;
     if (*command != 0) {
         if (*command & CMD_RESET) {
             spiStatus = spiCommand->SPIReset();
-            if (spiStatus == ::SPICommand::Success) {
+            if (spiStatus == NewJapanRadio::SPICommand::Success) {
                 packet->Header = ResponseHeader;
                 packet->OpCode = OP_SPI_RESET;
             }
@@ -32,7 +32,7 @@ static bool validateCtrl(uint8_t ctrl);
         else if (*command & CMD_WRITE_8BIT) {
             if (checkAddressRange(args->Param)) {
                 spiStatus = spiCommand->RegisterWrite8Bit(args->Param, args->Data0);
-                if (spiStatus == ::SPICommand::Success) {
+                if (spiStatus == NewJapanRadio::SPICommand::Success) {
                     packet->Header = ResponseHeader;
                     packet->OpCode = OP_REGISTER_WRITE_8BIT;
                     packet->Param = args->Param;
@@ -51,7 +51,7 @@ static bool validateCtrl(uint8_t ctrl);
             if (checkAddressRange(args->Param)) {
                 uint8_t rd = 0;
                 spiStatus = spiCommand->RegisterRead8Bit(args->Param, &rd);
-                if (spiStatus == ::SPICommand::Success) {
+                if (spiStatus == NewJapanRadio::SPICommand::Success) {
                     packet->Header = ResponseHeader;
                     packet->OpCode = OP_REGISTER_READ_8BIT;
                     packet->Param = args->Param;
@@ -68,7 +68,7 @@ static bool validateCtrl(uint8_t ctrl);
         else if (*command & CMD_WRITE_16BIT) {
             if (checkAddressRange(args->Param)) {
                 spiStatus = spiCommand->RegisterWrite16Bit(args->Param, args->Data0, args->Data1);
-                if (spiStatus == ::SPICommand::Success) {
+                if (spiStatus == NewJapanRadio::SPICommand::Success) {
                     packet->Header = ResponseHeader;
                     packet->OpCode = OP_REGISTER_WRITE_16BIT;
                     packet->Param = args->Param;
@@ -88,7 +88,7 @@ static bool validateCtrl(uint8_t ctrl);
                 uint8_t rd0 = 0;
                 uint8_t rd1 = 0;
                 spiStatus = spiCommand->RegisterRead16Bit(args->Param, &rd0, &rd1);
-                if (spiStatus == ::SPICommand::Success) {
+                if (spiStatus == NewJapanRadio::SPICommand::Success) {
                     packet->Header = ResponseHeader;
                     packet->OpCode = OP_REGISTER_READ_16BIT;
                     packet->Param = args->Param;
@@ -107,14 +107,14 @@ static bool validateCtrl(uint8_t ctrl);
             if (validateCtrl(args->Param)) {
                 uint16_t rd = 0;
                 spiStatus = spiCommand->StartSingleConversion(args->Param, &rd);
-                if (spiStatus == ::SPICommand::Success) {
+                if (spiStatus == NewJapanRadio::SPICommand::Success) {
                     packet->Header = ResponseHeader;
                     packet->OpCode = OP_START_SINGLE_CONVERSION;
                     packet->Param = args->Param;
                     packet->Data0 = (uint8_t)(rd >> 8);
                     packet->Data1 = (uint8_t)(rd & 0x00FF);
                 }
-                else if (spiStatus == ::SPICommand::Abort) {
+                else if (spiStatus == NewJapanRadio::SPICommand::Abort) {
                     status = Abort;
                 }
             }
@@ -133,14 +133,14 @@ static bool validateCtrl(uint8_t ctrl);
                     uint16_t resultLength = 0;
                     spiStatus = spiCommand->StartContinuousConversion(args->Param, adcDataBuffer->GetBuffer(), length, &resultLength);
                     adcDataBuffer->SetDataLength(resultLength);
-                    if (spiStatus == ::SPICommand::Success) {
+                    if (spiStatus == NewJapanRadio::SPICommand::Success) {
                         packet->Header = ResponseHeader;
                         packet->OpCode = OP_START_CONTINUOUS_CONVERSION;
                         packet->Param = args->Param;
                         packet->Data0 = args->Byte2;
                         packet->Data1 = args->Byte3;
                     }
-                    else if (spiStatus == ::SPICommand::Abort) {
+                    else if (spiStatus == NewJapanRadio::SPICommand::Abort) {
                         status = Abort;
                     }
                 }
@@ -167,7 +167,7 @@ static bool validateCtrl(uint8_t ctrl);
                     uint16_t resultLength = 0;
                     spiStatus = spiCommand->StartIntermittentConversion(args->Param, adcDataBuffer->GetBuffer(), interval, length, &resultLength);
                     adcDataBuffer->SetDataLength(resultLength);
-                    if (spiStatus == ::SPICommand::Success) {
+                    if (spiStatus == NewJapanRadio::SPICommand::Success) {
                         packet->Header = ResponseHeader;
                         packet->OpCode = OP_START_INTERMITTENT_CONVERSION;
                         packet->Param = args->Param;
@@ -178,7 +178,7 @@ static bool validateCtrl(uint8_t ctrl);
                         packet->Byte6 = args->Byte6;
                         packet->Byte7 = args->Byte7;
                     }
-                    else if (spiStatus == ::SPICommand::Abort) {
+                    else if (spiStatus == NewJapanRadio::SPICommand::Abort) {
                         status = Abort;
                     }
                 }
@@ -230,7 +230,7 @@ static bool validateCtrl(uint8_t ctrl);
     return status;
 }
 
-void ::Dispatcher::SetAbortRequest() {
+void NewJapanRadio::Dispatcher::SetAbortRequest() {
     spiCommand->SetAbortRequest();
 }
 

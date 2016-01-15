@@ -2,15 +2,15 @@
 
 #include "adc_data_buffer.h"
 
-::ADCDataBuffer::ADCDataBuffer() {
+NewJapanRadio::ADCDataBuffer::ADCDataBuffer() {
     dataLength = 0;
     allocatedSize = 0;
 }
 
-::ADCDataBuffer::~ADCDataBuffer() {
+NewJapanRadio::ADCDataBuffer::~ADCDataBuffer() {
 }
 
-bool ::ADCDataBuffer::Alloc(uint16_t size) {
+bool NewJapanRadio::ADCDataBuffer::Alloc(uint16_t size) {
     dataLength = 0;
 
     uint32_t alignedSize = size;
@@ -30,18 +30,18 @@ bool ::ADCDataBuffer::Alloc(uint16_t size) {
     }
 }
 
-uint16_t * ::ADCDataBuffer::GetBuffer() {
+uint16_t * NewJapanRadio::ADCDataBuffer::GetBuffer() {
     return adcDataBuffer;
 }
 
-uint16_t ::ADCDataBuffer::GetAllocatedSize() {
+uint16_t NewJapanRadio::ADCDataBuffer::GetAllocatedSize() {
     return allocatedSize;
 }
 
-uint16_t ::ADCDataBuffer::GetDataLength() {
+uint16_t NewJapanRadio::ADCDataBuffer::GetDataLength() {
     return dataLength;
 }
 
-void ::ADCDataBuffer::SetDataLength(uint16_t length) {
+void NewJapanRadio::ADCDataBuffer::SetDataLength(uint16_t length) {
      dataLength = length;
 }

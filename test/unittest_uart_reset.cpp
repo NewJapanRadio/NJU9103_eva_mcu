@@ -14,17 +14,17 @@ extern Packet rxPacket;
 extern ReceiveDataStatus receiveDataStatus;
 extern Command command;
 
-extern ::Serial uart;
-extern ::Timer packetWatchTimer;
-extern ::Dispatcher dispatcher;
-extern ::ADCDataBuffer adcDataBuffer;
+extern NewJapanRadio::Serial uart;
+extern NewJapanRadio::Timer packetWatchTimer;
+extern NewJapanRadio::Dispatcher dispatcher;
+extern NewJapanRadio::ADCDataBuffer adcDataBuffer;
 
 extern void (*fpIsrRx)(void);
-extern void _attach(void (*fp)(void), ::Serial::IrqType type);
+extern void _attach(void (*fp)(void), NewJapanRadio::Serial::IrqType type);
 
 TEST(UARTReset, Case1) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     {
@@ -68,7 +68,7 @@ TEST(UARTReset, Case1) {
 
 TEST(UARTReset, Case2) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     {
@@ -114,7 +114,7 @@ TEST(UARTReset, Case2) {
 
 TEST(UARTReset, Case3) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     {

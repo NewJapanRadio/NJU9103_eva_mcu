@@ -6,17 +6,17 @@ NJRC_STATIC Packet rxPacket;
 NJRC_STATIC ReceiveDataStatus receiveDataStatus;
 NJRC_STATIC Command command;
 
-NJRC_STATIC ::Serial uart;
-NJRC_STATIC ::Timer packetWatchTimer;
-NJRC_STATIC ::Dispatcher dispatcher;
-NJRC_STATIC ::ADCDataBuffer adcDataBuffer;
+NJRC_STATIC NewJapanRadio::Serial uart;
+NJRC_STATIC NewJapanRadio::Timer packetWatchTimer;
+NJRC_STATIC NewJapanRadio::Dispatcher dispatcher;
+NJRC_STATIC NewJapanRadio::ADCDataBuffer adcDataBuffer;
 
 void setup() {
     receiveDataStatus = 0;
     command = 0;
 
     // set Rx interrupt
-    uart.attach(isrRx, ::Serial::RxIrq);
+    uart.attach(isrRx, NewJapanRadio::Serial::RxIrq);
     packetWatchTimer.attach(isrPacketWatch, 300);
 }
 
@@ -24,10 +24,10 @@ void loop() {
     Packet packet;
 
     if (command != 0) {
-        ::Dispatcher::Status status;
+        NewJapanRadio::Dispatcher::Status status;
         status = dispatcher.Dispatch(&command, &rxPacket, &packet, &adcDataBuffer);
 
-        if (status != ::Dispatcher::Abort) {
+        if (status != NewJapanRadio::Dispatcher::Abort) {
             sendPacket(&packet);
             if (packet.OpCode == OP_START_ADC_DATA_DUMP) {
                 dumpADCData();

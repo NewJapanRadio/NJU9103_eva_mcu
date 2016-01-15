@@ -1,19 +1,19 @@
 #include "sleep_wrapper.h"
 
-::Sleep::Sleep() {
+NewJapanRadio::Sleep::Sleep() {
 }
 
-::Sleep::~Sleep() {
+NewJapanRadio::Sleep::~Sleep() {
 }
 
-void ::Sleep::sleep(uint32_t t_s) {
+void NewJapanRadio::Sleep::sleep(uint32_t t_s) {
     wait(t_s);
 }
 
-void ::Sleep::sleepMillisecond(uint32_t t_ms) {
+void NewJapanRadio::Sleep::sleepMillisecond(uint32_t t_ms) {
     wait_ms(t_ms);
 }
 
-void ::Sleep::sleepMicrosecond(uint32_t t_us) {
+void NewJapanRadio::Sleep::sleepMicrosecond(uint32_t t_us) {
     wait_us(t_us);
 }

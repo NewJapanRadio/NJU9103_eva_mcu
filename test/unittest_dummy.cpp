@@ -4,12 +4,12 @@ Packet rxPacket;
 ReceiveDataStatus receiveDataStatus;
 Command command;
 
-::Serial uart;
-::Timer packetWatchTimer;
-::Dispatcher dispatcher;
-::ADCDataBuffer adcDataBuffer;
+NewJapanRadio::Serial uart;
+NewJapanRadio::Timer packetWatchTimer;
+NewJapanRadio::Dispatcher dispatcher;
+NewJapanRadio::ADCDataBuffer adcDataBuffer;
 
 void (*fpIsrRx)(void);
-void _attach(void (*fp)(void), ::Serial::IrqType type) {
+void _attach(void (*fp)(void), NewJapanRadio::Serial::IrqType type) {
     fpIsrRx = fp;
 }

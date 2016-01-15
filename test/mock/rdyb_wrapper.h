@@ -4,12 +4,14 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-class Rdyb {
-    public:
-        Rdyb() { }
+namespace NewJapanRadio {
+    class Rdyb {
+        public:
+            Rdyb() { }
 
-        MOCK_METHOD0(read,
-                int());
-};
+            MOCK_METHOD0(read,
+                    int());
+    };
+}
 
 #endif

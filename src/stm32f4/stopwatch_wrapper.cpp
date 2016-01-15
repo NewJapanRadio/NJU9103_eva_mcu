@@ -1,30 +1,30 @@
 #include "stopwatch_wrapper.h"
 
-::Stopwatch::Stopwatch() {
+NewJapanRadio::Stopwatch::Stopwatch() {
     timer = new mbed::Timer();
 }
 
-::Stopwatch::~Stopwatch() {
+NewJapanRadio::Stopwatch::~Stopwatch() {
     delete timer;
 }
 
-void ::Stopwatch::start() {
+void NewJapanRadio::Stopwatch::start() {
     timer->reset();
     timer->start();
 }
 
-void ::Stopwatch::stop() {
+void NewJapanRadio::Stopwatch::stop() {
     timer->stop();
 }
 
-uint32_t ::Stopwatch::read() {
+uint32_t NewJapanRadio::Stopwatch::read() {
     return timer->read();
 }
 
-uint32_t ::Stopwatch::readMillisecond() {
+uint32_t NewJapanRadio::Stopwatch::readMillisecond() {
     return timer->read_ms();
 }
 
-uint32_t ::Stopwatch::readMicrosecond() {
+uint32_t NewJapanRadio::Stopwatch::readMicrosecond() {
     return timer->read_us();
 }

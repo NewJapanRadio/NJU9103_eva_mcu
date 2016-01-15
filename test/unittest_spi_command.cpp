@@ -8,18 +8,18 @@ using namespace ::testing;
 #undef private
 
 TEST(SPICommand, SpiReset) {
-    SPICommand spiCommand;
+    NewJapanRadio::SPICommand spiCommand;
     {
         InSequence s;
         EXPECT_CALL(*spiCommand.spi, write(0x7F));
         EXPECT_CALL(*spiCommand.spi, write(0xFF));
         EXPECT_CALL(*spiCommand.spi, write(0xFF));
     }
-    EXPECT_EQ(SPICommand::Success, spiCommand.SPIReset());
+    EXPECT_EQ(NewJapanRadio::SPICommand::Success, spiCommand.SPIReset());
 }
 
 TEST(SPICommand, RegisterWrite8Bit) {
-    SPICommand spiCommand;
+    NewJapanRadio::SPICommand spiCommand;
 
     uint8_t addr = 0x0A;
     uint8_t data = 0xBC;
@@ -30,11 +30,11 @@ TEST(SPICommand, RegisterWrite8Bit) {
         EXPECT_CALL(*spiCommand.spi, write(0xBC));
     }
 
-    EXPECT_EQ(SPICommand::Success, spiCommand.RegisterWrite8Bit(addr, data));
+    EXPECT_EQ(NewJapanRadio::SPICommand::Success, spiCommand.RegisterWrite8Bit(addr, data));
 }
 
 TEST(SPICommand, RegisterWrite16Bit) {
-    SPICommand spiCommand;
+    NewJapanRadio::SPICommand spiCommand;
 
     uint8_t  addr  = 0x01;
     uint16_t data = 0xCAFE;
@@ -46,11 +46,11 @@ TEST(SPICommand, RegisterWrite16Bit) {
         EXPECT_CALL(*spiCommand.spi, write(0xFE));
     }
 
-    EXPECT_EQ(SPICommand::Success, spiCommand.RegisterWrite16Bit(addr, (uint8_t)(data >> 8), (uint8_t)((data & 0x00FF))));
+    EXPECT_EQ(NewJapanRadio::SPICommand::Success, spiCommand.RegisterWrite16Bit(addr, (uint8_t)(data >> 8), (uint8_t)((data & 0x00FF))));
 }
 
 TEST(SPICommand, RegisterRead8Bit) {
-    SPICommand spiCommand;
+    NewJapanRadio::SPICommand spiCommand;
 
     uint8_t addr = 0x04;
     uint8_t data;
@@ -62,12 +62,12 @@ TEST(SPICommand, RegisterRead8Bit) {
             .WillOnce(Return(0x55));
     }
 
-    EXPECT_EQ(SPICommand::Success, spiCommand.RegisterRead8Bit(addr, &data));
+    EXPECT_EQ(NewJapanRadio::SPICommand::Success, spiCommand.RegisterRead8Bit(addr, &data));
     EXPECT_EQ(data, 0x55);
 }
 
 TEST(SPICommand, RegisterRead16Bit) {
-    SPICommand spiCommand;
+    NewJapanRadio::SPICommand spiCommand;
 
     uint8_t addr = 0x04;
     uint8_t data0;
@@ -82,13 +82,13 @@ TEST(SPICommand, RegisterRead16Bit) {
             .WillOnce(Return(0xCA));
     }
 
-    EXPECT_EQ(SPICommand::Success, spiCommand.RegisterRead16Bit(addr, &data0, &data1));
+    EXPECT_EQ(NewJapanRadio::SPICommand::Success, spiCommand.RegisterRead16Bit(addr, &data0, &data1));
     EXPECT_EQ(data0, 0x70);
     EXPECT_EQ(data1, 0xCA);
 }
 
 TEST(SPICommand, StartSingleConversion) {
-    SPICommand spiCommand;
+    NewJapanRadio::SPICommand spiCommand;
     uint16_t rd;
 
     uint8_t chsel_mode =  0x22;
@@ -111,12 +111,12 @@ TEST(SPICommand, StartSingleConversion) {
             .WillOnce(Return(0x34));  // ADCDATA1 Register Value
     }
 
-    EXPECT_EQ(SPICommand::Success, spiCommand.StartSingleConversion(chsel_mode, &rd));
+    EXPECT_EQ(NewJapanRadio::SPICommand::Success, spiCommand.StartSingleConversion(chsel_mode, &rd));
     EXPECT_EQ(0x1234, rd);
 }
 
 TEST(SPICommand, StartContinuousConversion) {
-    SPICommand spiCommand;
+    NewJapanRadio::SPICommand spiCommand;
     uint16_t rd[7];
     uint16_t len;
 
@@ -153,7 +153,7 @@ TEST(SPICommand, StartContinuousConversion) {
         EXPECT_CALL(*spiCommand.spi, write(_)).Times(Exactly(2)).WillOnce(Return(0x65)).WillOnce(Return(0x43));
     }
 
-    EXPECT_EQ(SPICommand::Success, spiCommand.StartContinuousConversion(chsel_mode, rd, 0x6, &len));
+    EXPECT_EQ(NewJapanRadio::SPICommand::Success, spiCommand.StartContinuousConversion(chsel_mode, rd, 0x6, &len));
     EXPECT_EQ(7, len);
     EXPECT_EQ(0x0123, rd[0]);
     EXPECT_EQ(0x4567, rd[1]);
@@ -165,7 +165,7 @@ TEST(SPICommand, StartContinuousConversion) {
 }
 
 TEST(SPICommand, StartIntermittentConversion) {
-    SPICommand spiCommand;
+    NewJapanRadio::SPICommand spiCommand;
     uint16_t rd[7];
     uint16_t len;
 
@@ -226,7 +226,7 @@ TEST(SPICommand, StartIntermittentConversion) {
         }
     }
 
-    EXPECT_EQ(SPICommand::Success, spiCommand.StartIntermittentConversion(chsel_mode, rd, 1050, 0x6, &len));
+    EXPECT_EQ(NewJapanRadio::SPICommand::Success, spiCommand.StartIntermittentConversion(chsel_mode, rd, 1050, 0x6, &len));
     EXPECT_EQ(7, len);
     EXPECT_EQ(0x0123, rd[0]);
     EXPECT_EQ(0x4567, rd[1]);
@@ -238,7 +238,7 @@ TEST(SPICommand, StartIntermittentConversion) {
 }
 
 TEST(SPICommand, WrongAddress_RegisterWrite8Bit) {
-    SPICommand spiCommand;
+    NewJapanRadio::SPICommand spiCommand;
 
     uint8_t addr = 0xA0;
     uint8_t data = 0xBC;
@@ -246,11 +246,11 @@ TEST(SPICommand, WrongAddress_RegisterWrite8Bit) {
     EXPECT_CALL(*spiCommand.spi, write(_))
         .Times(Exactly(0));
 
-    EXPECT_EQ(SPICommand::Error, spiCommand.RegisterWrite8Bit(addr, data));
+    EXPECT_EQ(NewJapanRadio::SPICommand::Error, spiCommand.RegisterWrite8Bit(addr, data));
 }
 
 TEST(SPICommand, WrongAddress_RegisterWrite16Bit) {
-    SPICommand spiCommand;
+    NewJapanRadio::SPICommand spiCommand;
 
     uint8_t  addr  = 0x10;
     uint16_t data = 0xCAFE;
@@ -258,11 +258,11 @@ TEST(SPICommand, WrongAddress_RegisterWrite16Bit) {
     EXPECT_CALL(*spiCommand.spi, write(_))
         .Times(Exactly(0));
 
-    EXPECT_EQ(SPICommand::Error, spiCommand.RegisterWrite16Bit(addr, (uint8_t)(data >> 8), (uint8_t)((data & 0x00FF))));
+    EXPECT_EQ(NewJapanRadio::SPICommand::Error, spiCommand.RegisterWrite16Bit(addr, (uint8_t)(data >> 8), (uint8_t)((data & 0x00FF))));
 }
 
 TEST(SPICommand, WrongAddress_RegisterRead8Bit) {
-    SPICommand spiCommand;
+    NewJapanRadio::SPICommand spiCommand;
 
     uint8_t addr = 0x40;
     uint8_t data = 0x00;
@@ -270,12 +270,12 @@ TEST(SPICommand, WrongAddress_RegisterRead8Bit) {
     EXPECT_CALL(*spiCommand.spi, write(_))
         .Times(Exactly(0));
 
-    EXPECT_EQ(SPICommand::Error, spiCommand.RegisterRead8Bit(addr, &data));
+    EXPECT_EQ(NewJapanRadio::SPICommand::Error, spiCommand.RegisterRead8Bit(addr, &data));
     EXPECT_EQ(data, 0x00);
 }
 
 TEST(SPICommand, WrongAddress_RegisterRead16Bit) {
-    SPICommand spiCommand;
+    NewJapanRadio::SPICommand spiCommand;
 
     uint8_t addr = 0xF0;
     uint8_t data0 = 0x00;
@@ -284,13 +284,13 @@ TEST(SPICommand, WrongAddress_RegisterRead16Bit) {
     EXPECT_CALL(*spiCommand.spi, write(_))
         .Times(Exactly(0));
 
-    EXPECT_EQ(SPICommand::Error, spiCommand.RegisterRead16Bit(addr, &data0, &data1));
+    EXPECT_EQ(NewJapanRadio::SPICommand::Error, spiCommand.RegisterRead16Bit(addr, &data0, &data1));
     EXPECT_EQ(data0, 0x00);
     EXPECT_EQ(data1, 0x00);
 }
 
 TEST(SPICommand, Abort_StartSingleConversion) {
-    SPICommand spiCommand;
+    NewJapanRadio::SPICommand spiCommand;
     uint16_t rd = 0x00;
 
     uint8_t chsel_mode =  0x22;
@@ -306,12 +306,12 @@ TEST(SPICommand, Abort_StartSingleConversion) {
         spiCommand.SetAbortRequest();
     }
 
-    EXPECT_EQ(SPICommand::Abort, spiCommand.StartSingleConversion(chsel_mode, &rd));
+    EXPECT_EQ(NewJapanRadio::SPICommand::Abort, spiCommand.StartSingleConversion(chsel_mode, &rd));
     EXPECT_EQ(0x00, rd);
 }
 
 TEST(SPICommand, Abort_StartContinuousConversion) {
-    SPICommand spiCommand;
+    NewJapanRadio::SPICommand spiCommand;
     uint16_t rd[7] = { 0x00 };
     uint16_t len = 0;
 
@@ -326,7 +326,7 @@ TEST(SPICommand, Abort_StartContinuousConversion) {
         .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 4
         .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 5
         .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 6
-        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(DoAll(InvokeWithoutArgs(&spiCommand, &SPICommand::SetAbortRequest), Return(1)));// 7
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(DoAll(InvokeWithoutArgs(&spiCommand, &NewJapanRadio::SPICommand::SetAbortRequest), Return(1)));// 7
 
     {
         InSequence s;
@@ -349,7 +349,7 @@ TEST(SPICommand, Abort_StartContinuousConversion) {
         // EXPECT_CALL(*spiCommand.spi, write(_)).Times(Exactly(2)).WillOnce(Return(0x65)).WillOnce(Return(0x43));
     }
 
-    EXPECT_EQ(SPICommand::Abort, spiCommand.StartContinuousConversion(chsel_mode, rd, 0x6, &len));
+    EXPECT_EQ(NewJapanRadio::SPICommand::Abort, spiCommand.StartContinuousConversion(chsel_mode, rd, 0x6, &len));
     EXPECT_EQ(6, len);
     EXPECT_EQ(0x0123, rd[0]);
     EXPECT_EQ(0x4567, rd[1]);
@@ -361,7 +361,7 @@ TEST(SPICommand, Abort_StartContinuousConversion) {
 }
 
 TEST(SPICommand, Abort_StartIntermittentConversion_1) {
-    SPICommand spiCommand;
+    NewJapanRadio::SPICommand spiCommand;
     uint16_t rd[7] = { 0 };
     uint16_t len;
 
@@ -374,7 +374,7 @@ TEST(SPICommand, Abort_StartIntermittentConversion_1) {
         .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 2
         .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 3
         .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(0)) // 4
-        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(DoAll(InvokeWithoutArgs(&spiCommand, &SPICommand::SetAbortRequest), Return(1)));
+        .WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(DoAll(InvokeWithoutArgs(&spiCommand, &NewJapanRadio::SPICommand::SetAbortRequest), Return(1)));
 
     EXPECT_CALL(*spiCommand.sleep, sleep(_))
         .Times(AnyNumber());
@@ -422,7 +422,7 @@ TEST(SPICommand, Abort_StartIntermittentConversion_1) {
         // }
     }
 
-    EXPECT_EQ(SPICommand::Abort, spiCommand.StartIntermittentConversion(chsel_mode, rd, 1050, 0x6, &len));
+    EXPECT_EQ(NewJapanRadio::SPICommand::Abort, spiCommand.StartIntermittentConversion(chsel_mode, rd, 1050, 0x6, &len));
     EXPECT_EQ(4, len);
     EXPECT_EQ(0x0123, rd[0]);
     EXPECT_EQ(0x4567, rd[1]);
@@ -434,7 +434,7 @@ TEST(SPICommand, Abort_StartIntermittentConversion_1) {
 }
 
 TEST(SPICommand, Abort_StartIntermittentConversion_2) {
-    SPICommand spiCommand;
+    NewJapanRadio::SPICommand spiCommand;
     uint16_t rd[7];
     uint16_t len;
 
@@ -499,10 +499,10 @@ TEST(SPICommand, Abort_StartIntermittentConversion_2) {
         EXPECT_CALL(*spiCommand.spi, write(_))
             .Times(Exactly(2))
             .WillOnce(Return(0xA9))
-            .WillOnce(DoAll(InvokeWithoutArgs(&spiCommand, &SPICommand::SetAbortRequest), Return(0x87)));
+            .WillOnce(DoAll(InvokeWithoutArgs(&spiCommand, &NewJapanRadio::SPICommand::SetAbortRequest), Return(0x87)));
     }
 
-    EXPECT_EQ(SPICommand::Abort, spiCommand.StartIntermittentConversion(chsel_mode, rd, 1050, 0x6, &len));
+    EXPECT_EQ(NewJapanRadio::SPICommand::Abort, spiCommand.StartIntermittentConversion(chsel_mode, rd, 1050, 0x6, &len));
     EXPECT_EQ(5, len);
     EXPECT_EQ(0x0123, rd[0]);
     EXPECT_EQ(0x4567, rd[1]);
@@ -515,7 +515,7 @@ TEST(SPICommand, Abort_StartIntermittentConversion_2) {
 
 // fail test for interval < conversion time
 TEST(SPICommand, Fail_StartIntermittentConversion) {
-    SPICommand spiCommand;
+    NewJapanRadio::SPICommand spiCommand;
     uint16_t rd[7];
     uint16_t len;
 
@@ -564,7 +564,7 @@ TEST(SPICommand, Fail_StartIntermittentConversion) {
             .WillOnce(Return(0x23));
     }
 
-    EXPECT_EQ(SPICommand::Fail, spiCommand.StartIntermittentConversion(chsel_mode, rd, 50, 0x6, &len));
+    EXPECT_EQ(NewJapanRadio::SPICommand::Fail, spiCommand.StartIntermittentConversion(chsel_mode, rd, 50, 0x6, &len));
 
     EXPECT_EQ(1, len);
     EXPECT_EQ(0x0123, rd[0]);

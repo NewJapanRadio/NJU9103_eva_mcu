@@ -1,17 +1,17 @@
 #include "spi_wrapper.h"
 
-::SPI::SPI() {
+NewJapanRadio::SPI::SPI() {
     spi = new mbed::SPI(SPI_MOSI, SPI_MISO, SPI_SCK);
 }
 
-::SPI::~SPI() {
+NewJapanRadio::SPI::~SPI() {
     delete spi;
 }
 
-uint8_t ::SPI::write(uint8_t wd) {
+uint8_t NewJapanRadio::SPI::write(uint8_t wd) {
     return (uint8_t)spi->write(wd);
 }
-void ::SPI::mode(SpiMode mode) {
+void NewJapanRadio::SPI::mode(SpiMode mode) {
     int mbedMode = 0;
     switch (mode) {
         case Mode0:
@@ -32,6 +32,6 @@ void ::SPI::mode(SpiMode mode) {
     spi->format(bytes(), mbedMode);
 }
 
-void ::SPI::frequency(uint64_t freq) {
+void NewJapanRadio::SPI::frequency(uint64_t freq) {
     spi->frequency(freq);
 }

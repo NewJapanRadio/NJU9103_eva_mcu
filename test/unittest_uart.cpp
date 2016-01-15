@@ -14,17 +14,17 @@ extern Packet rxPacket;
 extern ReceiveDataStatus receiveDataStatus;
 extern Command command;
 
-extern ::Serial uart;
-extern ::Timer packetWatchTimer;
-extern ::Dispatcher dispatcher;
-extern ::ADCDataBuffer adcDataBuffer;
+extern NewJapanRadio::Serial uart;
+extern NewJapanRadio::Timer packetWatchTimer;
+extern NewJapanRadio::Dispatcher dispatcher;
+extern NewJapanRadio::ADCDataBuffer adcDataBuffer;
 
 extern void (*fpIsrRx)(void);
-extern void _attach(void (*fp)(void), ::Serial::IrqType type);
+extern void _attach(void (*fp)(void), NewJapanRadio::Serial::IrqType type);
 
 TEST(UART, SPIReset) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     {
@@ -78,7 +78,7 @@ TEST(UART, SPIReset) {
 
 TEST(UART, RegisterWrite8Bit) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     {
@@ -131,7 +131,7 @@ TEST(UART, RegisterWrite8Bit) {
 
 TEST(UART, RegisterRead8Bit) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     {
@@ -185,7 +185,7 @@ TEST(UART, RegisterRead8Bit) {
 
 TEST(UART, RegisterWrite16Bit) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     {
@@ -239,7 +239,7 @@ TEST(UART, RegisterWrite16Bit) {
 
 TEST(UART, RegisterRead16Bit) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     {
@@ -295,7 +295,7 @@ TEST(UART, RegisterRead16Bit) {
 
 TEST(UART, StartSingleConversion) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     {
@@ -359,7 +359,7 @@ TEST(UART, StartSingleConversion) {
 
 TEST(UART, StartContinuousConversion) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     {
@@ -458,7 +458,7 @@ TEST(UART, StartContinuousConversion) {
 
 TEST(UART, StartIntermittentConversion) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     EXPECT_CALL(*(dispatcher.spiCommand)->sleep, sleep(_))
@@ -570,7 +570,7 @@ TEST(UART, StartIntermittentConversion) {
 
 TEST(UART, StartADCDataDump) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     adcDataBuffer.SetDataLength(5);
@@ -637,7 +637,7 @@ void StopSingleConversion() {
 }
 TEST(UART, StopSingleConversion) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     {
@@ -702,7 +702,7 @@ TEST(UART, StopSingleConversion) {
 }
 TEST(UART, StopSingleConversion_By_SPIReset) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     {
@@ -777,7 +777,7 @@ void StopContinuousConversion() {
 }
 TEST(UART, StopContinuousConversion) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     {
@@ -882,7 +882,7 @@ TEST(UART, StopContinuousConversion) {
 }
 TEST(UART, StopContinuousConversion_By_SPIReset) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     {
@@ -998,7 +998,7 @@ void StopIntermittentConversion() {
 }
 TEST(UART, StopIntermittentConversion) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     EXPECT_CALL(*(dispatcher.spiCommand)->sleep, sleep(_))
@@ -1115,7 +1115,7 @@ TEST(UART, StopIntermittentConversion) {
 }
 TEST(UART, StopIntermittentConversion_By_SPIReset) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     EXPECT_CALL(*(dispatcher.spiCommand)->sleep, sleep(_))
@@ -1244,7 +1244,7 @@ void StopADCDataDump() {
 }
 TEST(UART, StopADCDataDump) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     adcDataBuffer.SetDataLength(16);
@@ -1329,7 +1329,7 @@ TEST(UART, StopADCDataDump) {
 }
 TEST(UART, StopADCDataDump_By_SPIReset) {
     EXPECT_CALL(packetWatchTimer, attach(_, _)).Times(AnyNumber());
-    EXPECT_CALL(uart, attach(_, ::Serial::RxIrq))
+    EXPECT_CALL(uart, attach(_, NewJapanRadio::Serial::RxIrq))
         .WillRepeatedly(Invoke(_attach));
 
     adcDataBuffer.SetDataLength(16);
