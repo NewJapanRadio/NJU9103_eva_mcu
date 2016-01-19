@@ -21,13 +21,13 @@ NewJapanRadio::Dispatcher::Status NewJapanRadio::Dispatcher::Dispatch(Command *c
     Status status = Error;
     NewJapanRadio::SPICommand::Status spiStatus;
     if (*command != 0) {
-        if (*command & CMD_RESET) {
+        if (*command & CMD_SPI_RESET) {
             spiStatus = spiCommand->SPIReset();
             if (spiStatus == NewJapanRadio::SPICommand::Success) {
                 packet->Header = ResponseHeader;
                 packet->OpCode = OP_SPI_RESET;
             }
-            *command ^= CMD_RESET;
+            *command ^= CMD_SPI_RESET;
         }
         else if (*command & CMD_WRITE_8BIT) {
             if (checkAddressRange(args->Param)) {

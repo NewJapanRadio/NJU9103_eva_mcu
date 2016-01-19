@@ -81,7 +81,7 @@ void isrPacketWatch() {
         receiveDataStatus ^= RX_STATUS_DATA_RECEIVED;
         if ((receiveDataStatus & RX_STATUS_CHKSUM_ERROR) == 0) {
             decodeCommand(&rxPacket, &command);
-            if ((command & CMD_RESET) != 0) {
+            if ((command & CMD_SPI_RESET) != 0) {
                 if ((command & CMD_START_SINGLE) != 0) {
                     dispatcher.SetAbortRequest();
                 }
@@ -92,7 +92,7 @@ void isrPacketWatch() {
                     dispatcher.SetAbortRequest();
                 }
                 if ((command & CMD_START_DUMP) != 0) {
-                    // CMD_RESET during CMD_START_DUMP is handled in dumpADCData();
+                    // CMD_SPI_RESET during CMD_START_DUMP is handled in dumpADCData();
                 }
             }
             else if ((command & CMD_STOP_SINGLE) != 0) {
@@ -167,7 +167,7 @@ void decodeCommand(Packet *args, Command *cmd) {
     if (args->Header == CommandHeader) {
         switch (args->OpCode) {
             case OP_SPI_RESET :
-                *cmd |= CMD_RESET;
+                *cmd |= CMD_SPI_RESET;
                 break;
             case OP_REGISTER_WRITE_8BIT :
                 *cmd |= CMD_WRITE_8BIT;
@@ -220,7 +220,7 @@ void dumpADCData() {
     packet.Header = DataHeader;
     uint16_t *buf = adcDataBuffer.GetBuffer();
     for (int i = 0; i < adcDataBuffer.GetAllocatedSize(); i = i + 4) {
-        if ((command & ( CMD_STOP_DUMP | CMD_RESET )) != 0) {
+        if ((command & ( CMD_STOP_DUMP | CMD_SPI_RESET )) != 0) {
             return;
         }
         packet.Byte0 = (uint8_t)(buf[i]   >> 8);

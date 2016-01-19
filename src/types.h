@@ -70,7 +70,7 @@ typedef uint8_t ReceiveDataStatus;
 #define RX_STATUS_DATA_RECEIVED 0x02
 
 typedef uint16_t Command;
-#define CMD_RESET              0x1000
+#define CMD_SPI_RESET          0x1000
 #define CMD_WRITE_8BIT         0x0001
 #define CMD_READ_8BIT          0x0002
 #define CMD_WRITE_16BIT        0x0004
