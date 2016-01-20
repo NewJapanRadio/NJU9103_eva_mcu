@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 
-#define MAX_BUFFER_SIZE 0x4000
+#define MAX_BUFFER_SIZE 0x8000
 
 #define PACKET_SIZE 9 // w/o CheckSum
 
