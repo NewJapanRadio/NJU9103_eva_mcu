@@ -75,7 +75,7 @@ namespace NewJapanRadio {
             void    attach(void (*fptr)(void), IrqType type);
 
         private:
-            mbed::Serial *serial;
+            mbed::RawSerial *serial;
     };
 }
 

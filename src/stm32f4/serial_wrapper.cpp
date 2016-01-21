@@ -6,7 +6,7 @@
 #define UART_STOP 1
 
 NewJapanRadio::Serial::Serial() {
-    serial = new mbed::Serial(USBTX, USBRX);
+    serial = new mbed::RawSerial(USBTX, USBRX);
     serial->baud(UART_BAUDRATE);
     serial->format(UART_BITS, UART_PARITY, UART_STOP);
 }
