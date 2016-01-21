@@ -121,6 +121,7 @@ NewJapanRadio::SPICommand::Status NewJapanRadio::SPICommand::StartContinuousConv
         }
         *resultLength = i + 1;
     }
+    RegisterWrite8Bit(ADDR_CTRL, control & 0xF0);
     return Success;
 }
 
