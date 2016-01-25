@@ -151,6 +151,9 @@ TEST(SPICommand, StartContinuousConversion) {
         EXPECT_CALL(*spiCommand.spi, write(_)).Times(Exactly(2)).WillOnce(Return(0xA9)).WillOnce(Return(0x87));
         EXPECT_CALL(*spiCommand.spi, write(0x1C));       // { addr[3:0], RW = 1, BC = 1, 0b00 }
         EXPECT_CALL(*spiCommand.spi, write(_)).Times(Exactly(2)).WillOnce(Return(0x65)).WillOnce(Return(0x43));
+        // Stop Continuous Conversion `RegisterWrite(ADDR_CTRL, 0xF0 & { chsel, mode })`
+        EXPECT_CALL(*spiCommand.spi, write(0x00));
+        EXPECT_CALL(*spiCommand.spi, write(0x20));
     }
 
     EXPECT_EQ(NewJapanRadio::SPICommand::Success, spiCommand.StartContinuousConversion(chsel_mode, rd, 0x6, &len));

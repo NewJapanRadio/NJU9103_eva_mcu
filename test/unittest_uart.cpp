@@ -414,6 +414,9 @@ TEST(UART, StartContinuousConversion) {
             .Times(Exactly(2))
             .WillOnce(Return(0x23))
             .WillOnce(Return(0x45));
+        // Stop Continuous Conversion `RegisterWrite(ADDR_CTRL, 0xF0 & { chsel, mode })`
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x00));
+        EXPECT_CALL(*(dispatcher.spiCommand)->spi, write(0x00));
     }
 
     uint8_t cmd[] = { 0x10, 0x60, 0x02, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x89 };
