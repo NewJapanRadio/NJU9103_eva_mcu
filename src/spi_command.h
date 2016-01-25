@@ -31,7 +31,8 @@ namespace NewJapanRadio {
                 Error = -1,
                 Success = 0,
                 Abort = 1,
-                Fail = 2
+                Fail = 2,
+                Timeout = 3
             };
 
             SPICommand();

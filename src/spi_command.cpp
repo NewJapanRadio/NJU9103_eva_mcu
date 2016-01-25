@@ -150,7 +150,7 @@ NewJapanRadio::SPICommand::Status NewJapanRadio::SPICommand::StartIntermittentCo
             sleep->sleepMicrosecond(interval - convtime);
         }
         else {
-            status = Fail;
+            status = Timeout;
             break;
         }
     }

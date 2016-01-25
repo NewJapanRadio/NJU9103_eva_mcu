@@ -63,6 +63,7 @@ typedef struct {
 #define OP_PARAMETER_ERROR             0xFE
 #define OP_BUFFER_SIZE_ERROR           0xFD
 #define OP_UNKNOWN_ERROR               0xFC
+#define OP_TIMEOUT_ERROR               0xFB
 
 typedef uint8_t ReceiveDataStatus;
 /* Receive Data Status Flag */

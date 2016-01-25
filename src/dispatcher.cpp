@@ -178,6 +178,14 @@ NewJapanRadio::Dispatcher::Status NewJapanRadio::Dispatcher::Dispatch(Command *c
                         packet->Byte6 = args->Byte6;
                         packet->Byte7 = args->Byte7;
                     }
+                    else if (spiStatus == NewJapanRadio::SPICommand::Timeout) {
+                        packet->OpCode = OP_TIMEOUT_ERROR;
+                        packet->Byte1 = OP_START_INTERMITTENT_CONVERSION;
+                        packet->Byte2 = args->Byte4;
+                        packet->Byte3 = args->Byte5;
+                        packet->Byte4 = args->Byte6;
+                        packet->Byte5 = args->Byte7;
+                    }
                     else if (spiStatus == NewJapanRadio::SPICommand::Abort) {
                         status = Abort;
                     }
