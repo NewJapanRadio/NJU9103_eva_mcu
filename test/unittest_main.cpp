@@ -119,7 +119,7 @@ TEST(Main, CmdDecode) {
     args.Header = CommandHeader;
     args.OpCode = OP_SPI_RESET;
     decodeCommand(&args, &cmd);
-    EXPECT_EQ(CMD_RESET, cmd);
+    EXPECT_EQ(CMD_SPI_RESET, cmd);
 }
 
 TEST(Main, InvalidCommand) {
