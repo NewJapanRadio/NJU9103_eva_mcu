@@ -5,7 +5,7 @@ NewJapanRadio::SPICommand::SPICommand() {
 
     spi = new NewJapanRadio::SPI();
     spi->mode(NewJapanRadio::SPI::Mode1);
-    spi->frequency(1E6);
+    spi->frequency(1E7);
 
     sleep = new NewJapanRadio::Sleep();
 
