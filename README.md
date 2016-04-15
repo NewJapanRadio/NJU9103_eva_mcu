@@ -1,6 +1,7 @@
 # mbed program for NJU9103 Evaluation Board
 
 ## Target Platform
+
 [NUCLEO-F411RE](https://developer.mbed.org/platforms/ST-Nucleo-F411RE/)
 
 ## UART Setting
@@ -24,6 +25,7 @@ Checksum is bit inversion of sum of the byte from Header to Byte7.
 `~(Header + Byte0 + ... + Byte7)`
 
 **ex)**
+
 ```c
 { 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } -> 0xEF
 ```
