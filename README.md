@@ -1,5 +1,7 @@
 # mbed program for NJU9103 Evaluation Board
 
+[![Build Status](https://travis-ci.org/NewJapanRadio/NJU9103_eva_mcu.svg?branch=master)](https://travis-ci.org/NewJapanRadio/NJU9103_eva_mcu)
+
 ## Target Platform
 
 [NUCLEO-F411RE](https://developer.mbed.org/platforms/ST-Nucleo-F411RE/)
