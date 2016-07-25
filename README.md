@@ -1,6 +1,6 @@
 # mbed program for NJU9103 Evaluation Board
 
-[![Build Status](https://travis-ci.org/NewJapanRadio/NJU9103_eva_mcu.svg?branc h=master)](https://travis-ci.org/NewJapanRadio/NJU9103_eva_mcu)
+[![Build Status](https://travis-ci.org/NewJapanRadio/NJU9103_eva_mcu.svg?branch=master)](https://travis-ci.org/NewJapanRadio/NJU9103_eva_mcu)
 
 ## Target Platform
 
