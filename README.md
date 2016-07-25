@@ -1,6 +1,6 @@
 # mbed program for NJU9103 Evaluation Board
 
-[![Build Status](https://travis-ci.org/NewJapanRadio/NJU9103_eva_mcu.svg?branch=master)](https://travis-ci.org/NewJapanRadio/NJU9103_eva_mcu)
+[![Build Status](https://travis-ci.org/NewJapanRadio/NJU9103_eva_mcu.svg?branc h=master)](https://travis-ci.org/NewJapanRadio/NJU9103_eva_mcu)
 
 ## Target Platform
 
@@ -27,7 +27,6 @@ Checksum is bit inversion of sum of the byte from Header to Byte7.
 `~(Header + Byte0 + ... + Byte7)`
 
 **ex)**
-
 ```c
 { 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } -> 0xEF
 ```
@@ -258,11 +257,12 @@ Response is returned at end of all conversion.
 Forbid Single Conversion setting to MODE bits.
 
 - Length : (LengthHighByte << 8) + LengthLowByte + 1
+- Interval : (Interval0 << 24) + (Interval1 << 16) + (Interval2 << 8) + Interval3
 
 ##### Send Bytes
 
 ```c
-{ 0x10, 0x70, Control, LengthHighByte, LengthLowByte, 0x00, 0x00, 0x00, 0x00, ChkSum }
+{ 0x10, 0x70, Control, LengthHighByte, LengthLowByte, Interval0, Interval1, Interval2, Interval3, ChkSum }
 ```
 
 ##### Response
@@ -319,7 +319,7 @@ The Length is number without zero padding
 ##### Response
 
 ```
-{ 0x10, 0x51, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x8E(ChkSum) }
+{ 0x20, 0x51, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x8E(ChkSum) }
 ```
 
 #### StopContinuousConversion
@@ -361,5 +361,5 @@ The Length is number without zero padding
 ##### Response
 
 ```c
-{ 0x10, 0x81, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5E(ChkSum) }
+{ 0x20, 0x81, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5E(ChkSum) }
 ```
